@@ -8,6 +8,10 @@ import Valid from "../component/auth/Valid";
 import SendForget from "../component/forget/sendForget";
 import Forget from "../component/forget/forget";
 import ResponsiveDrawer from "../component/layout/res/ResponsiveDrawer";
+const io = require("socket.io-client");
+const URL = "http://localhost:3001";
+const socket = io(URL);
+
 
 
 const Init = (props) => {
@@ -33,7 +37,7 @@ const Init = (props) => {
       .catch((error) => {
         console.log(error);
       });
-  });
+    });
 
   // const [darkMode, setDarkMode] = useState(false);
 
@@ -45,7 +49,7 @@ const Init = (props) => {
   return (
     <ThemeProvider theme={darkTheme}>
       {loggedin === true && (
-        <ResponsiveDrawer logout={logout} loggedin={loggedin} />
+        <ResponsiveDrawer logout={logout} loggedin={loggedin} socket={socket} />
       )}
       {loggedin === false && (
         <Switch>

@@ -1,5 +1,6 @@
 import React from "react";
 import Axios from "axios";
+import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import { makeStyles, Grid, Paper, List ,ListItem ,ListItemSecondaryAction ,ListItemText ,ListItemAvatar ,Checkbox ,Avatar} from '@material-ui/core';
 
 const ChatList = (props) => {
@@ -14,19 +15,19 @@ const ChatList = (props) => {
             if(res.data.boards)
             {
                 var result = res.data.boards
-                console.log('boards', result);
-                console.log('...boards', ...result);
+                // console.log('boards', result);
+                // console.log('...boards', ...result);
                 setPeople([...result]);
             
             }
         }).catch((err) => {console.log(err)})
     }, [])
-    console.log('people', people)
+    // console.log('people', people)
     return (
         <div>
-        <Grid container spacing={1} style={{background: 'lightgray'}}>
+        <Grid container spacing={1} style={{background: '#edebf552', height:"70vh", border:"0.5px lightgray solid"}}>
         <Grid item md={2}>
-            <h3>People</h3>
+            <PeopleAltIcon color="blue" />
             <hr />
             <List>
             {
