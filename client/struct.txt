@@ -1,0 +1,3 @@
+First file App.js a react component
+we will init all data in file init.js
+every api has a component 
