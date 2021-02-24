@@ -1,6 +1,7 @@
 const chat = require('../models/chat');
 
 
+
 exports.people = async (req, res) => {
     
     // Getting the Id of people Who i can chat with (peopleIds) : 
@@ -15,7 +16,7 @@ exports.people = async (req, res) => {
     peopleIds = tmp.map((el => {
         return (el.user1 == userId) ? el.user2 : el.user1;
     }))
-    console.log('pIds', peopleIds);
+    // console.log('pIds', peopleIds);
 
     ///////// we consider that borad is Username & Profile Picture 
     
@@ -28,6 +29,6 @@ exports.people = async (req, res) => {
         })
     }
     res.json({boards: boards});
-    console.log('boards', boards);
+    // console.log('boards', boards);
 
 }

@@ -10,8 +10,24 @@ const pss = require('./util/passport.js')
 const passport = require('passport')
 const cors = require("cors")
 const express = require('express')
+const app = require('express')();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"]
+    }}
+    );
 
-const app = express();
+    io.on('connection', (socket) => {
+        console.log('we have a new connection');
+    
+        socket.on('disconnect', () => {
+            console.log('User had left')
+        })
+    })
+
+// const server = http.createServer(app);
 app.use(express.json());
 var corsOptions = {
     origin: 'http://localhost:3000',
@@ -42,4 +58,10 @@ app.use(userRoutes)
 app.use(errRoutes)
 app.use('/chat', chatRoutes);
 
-app.listen(3001)
+// const io = socketio(server)
+
+
+// server.listen(3001)
+http.listen(3001, () => {
+    console.log('listening on *:3001');
+  }); 
