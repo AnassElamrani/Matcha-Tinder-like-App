@@ -5,7 +5,8 @@ const express = require('express');
 const route = express.Router();
 const passport = require('passport');
 
-// gaet Avatar
+
+// get Avatar
 
 route.post('/user/getUserAvatar', userController.Avatar);
 

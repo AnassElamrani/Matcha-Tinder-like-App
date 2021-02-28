@@ -10,24 +10,36 @@ const pss = require('./util/passport.js')
 const passport = require('passport')
 const cors = require("cors")
 const express = require('express')
-const app = require('express')();
+
+const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
         origin: "http://localhost:3000",
         methods: ["GET", "POST"]
-    }}
-    );
+}}
+);
+// we have to fetch for connected user Email To create a room and join the user to it!
 
-    io.on('connection', (socket) => {
-        console.log('we have a new connection');
-    
-        socket.on('disconnect', () => {
-            console.log('User had left')
-        })
+var room = '';
+
+io.on('connection', (socket) => {
+    socket.on('myRoom', (email) => {
+        room = email;
+        console.log('room', room);
     })
+    socket.join(room);
+    // console.log('socket.id', socket.id)
+    console.log('a user connected')
+    socket.on('msg', (data) => {
+      room = data.to;
+      console.log('data :', data);
+      socket.join(room);
+    //   io.emit('chat-msg', {message:msg, Id: socket.id})
+    io.in(room).emit('new_msg', data.text);
+    })
+})
 
-// const server = http.createServer(app);
 app.use(express.json());
 var corsOptions = {
     origin: 'http://localhost:3000',
@@ -58,10 +70,4 @@ app.use(userRoutes)
 app.use(errRoutes)
 app.use('/chat', chatRoutes);
 
-// const io = socketio(server)
-
-
-// server.listen(3001)
-http.listen(3001, () => {
-    console.log('listening on *:3001');
-  }); 
+http.listen(3001)

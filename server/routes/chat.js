@@ -6,6 +6,10 @@ const chatController = require("../controllers/chat");
 const express = require("express");
 const route = express.Router();
 
-route.post('/people', chatController.people)
+route.post('/people', chatController.people);
+
+// the Room will have connected User Email as name;
+
+route.post('/getConnectedUserInfos', chatController.getUserInfos);
 
 module.exports = route;

@@ -25,7 +25,6 @@ import {
   ThumbDown as ThumbDownIcon
 } from '@material-ui/icons'
 
-
 const useStyles = makeStyles((theme) => ({
   diva: {
     // background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -66,7 +65,6 @@ const Browsing = (props) => {
   const classes = useStyles()
   const [list, setList] = React.useState([])
   const [list1, setList1] = React.useState([])
-
 
   const getLocalisation = React.useCallback(async () => {
     await Axios.post(`/browsing/geo/${props.id}`).then((res) => {

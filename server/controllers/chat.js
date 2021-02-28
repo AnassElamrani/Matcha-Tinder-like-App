@@ -1,7 +1,6 @@
 const chat = require('../models/chat');
 
 
-
 exports.people = async (req, res) => {
     
     // Getting the Id of people Who i can chat with (peopleIds) : 
@@ -16,9 +15,9 @@ exports.people = async (req, res) => {
     peopleIds = tmp.map((el => {
         return (el.user1 == userId) ? el.user2 : el.user1;
     }))
-    // console.log('pIds', peopleIds);
+    console.log('pIds', peopleIds);
 
-    ///////// we consider that borad is Username & Profile Picture 
+    ///////// we consider that borad is Username & Profile Picture && email
     
     var boards = []
     for(i = 0; i < peopleIds.length; i++)
@@ -30,5 +29,11 @@ exports.people = async (req, res) => {
     }
     res.json({boards: boards});
     // console.log('boards', boards);
+}
 
+exports.getUserInfos = async (req, res) => {
+    var userId = req.body.userId;
+    await chat.getUserInfos(userId).then((hadik) => {
+        res.json({myInfos: hadik[0][0]});
+    })
 }

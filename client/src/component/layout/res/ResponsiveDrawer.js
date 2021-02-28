@@ -36,14 +36,6 @@ import Home from "../../profil/Home"
 import EditProfil from "../../profil/editProfill"
 import Setting from "../../profil/setting"
 import History from "../../history/history"
-// import { socket } from "./SocketInit"
-
-
-
-
-
-// socket.on("connection", (socket)=> {
-// })
 
 const instance = Axios.create({ withCredentials: true });
 
