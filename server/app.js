@@ -21,23 +21,25 @@ const io = require('socket.io')(http, {
 );
 // we have to fetch for connected user Email To create a room and join the user to it!
 
-var room = '';
 
+var users = {};
 io.on('connection', (socket) => {
-    socket.on('myRoom', (email) => {
-        room = email;
-        console.log('room', room);
+    console.log('connected');
+    socket.emit('askForUserEmail');
+    socket.on('sendUserEmail', (userId) => {
+        console.log('******')
+        users[userId] = socket.id;
+        console.log('user', users);
     })
-    socket.join(room);
-    // console.log('socket.id', socket.id)
-    console.log('a user connected')
-    socket.on('msg', (data) => {
-      room = data.to;
-      console.log('data :', data);
-      socket.join(room);
-    //   io.emit('chat-msg', {message:msg, Id: socket.id})
-    io.in(room).emit('new_msg', data.text);
-    })
+    socket.on('new-msg', (data) => {
+        const receiverId = users[data.to];
+        const message = data.text;
+        const from = data.from;
+        console.log('to', data.to, receiverId);
+        socket.broadcast.to(receiverId).emit('send', {message: message, from: from});
+    });
+        
+
 })
 
 app.use(express.json());
@@ -55,6 +57,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 // Images ***************************************************
 // need help of package path
 const path = require('path');
+const { disconnect } = require("process");
 // static folder to thing like image ...
 app.use(express.static(path.join(__dirname, 'public/upload')));
 // console.log(express.static(path.join(__dirname, 'public'))

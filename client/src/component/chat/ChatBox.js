@@ -8,13 +8,6 @@ const socket = io(URL);
 
 
 
-socket.on('new_msg', (data) => {
-    var messages = document.getElementById('messages');
-    var span = document.createElement('span');
-    span.innerHTML = data+'</br>';
-    messages.appendChild(span);
-    // alert(data);
-})
 
 const useStyles = makeStyles(() => ({
     chatBox: {
@@ -24,50 +17,80 @@ const useStyles = makeStyles(() => ({
     },
     textInput: {
         position: "absolute",
-            bottom: 0,
-            color: 'purple',
-            width: '100%',
-        }
-        
-    }));
+        bottom: 0,
+        color: 'purple',
+        width: '100%',
+    }
     
-    const ChatBox = (props) => {
-        
-        socket.on('connect', () => {
-            socket.emit('myRoom', props.myInfos.email);
-        })
-        if(props.hisInfos)
+}));
+
+const ChatBox = (props) => {
+    const classes = useStyles();
+
+    function isEmpty(obj) {
+        for(var key in obj) {
+            if(obj.hasOwnProperty(key))
+                return false;
+        }
+        return true;
+    }
+
+    socket.on('send', (data) => {
+        alert(1);
+        var messages = document.getElementById('messages');
+        var span = document.createElement('span');
+        span.innerHTML = data.message+'</br>';
+        messages.appendChild(span);
+    })
+
+
+    //// 1 ////////
+
+    React.useEffect(() => {
+        // if(!isEmpty(props.myInfos))
+        // {
+                    socket.on('askForUserEmail', () => {
+                        console.log(socket.id)
+                        socket.emit('sendUserEmail', props.myInfos.email);
+                    });
+        // }
+    })
+    
+
+    const sendMessage = (e) => {
+        e.preventDefault();
+        if(!isEmpty(props.hisInfos))
         {
-            console.log('his', props.hisInfos.email);
-        }
-
-        // console.log('name:',props.name );
-
-        const classes = useStyles();
-
-        const sendMessage = (e) => {
-            e.preventDefault();
-            if(props.hisInfos)
+            var input = document.getElementById('msg');
+            if(e.keyCode === 13)
             {
-
-                var input = document.getElementById('msg');
-                if(e.keyCode === 13)
-                {
-                    socket.emit('msg', {text:input.value, to: props.hisInfos.email});
-                    input.value = '';
-                    
-                }
-            }else {
-                console.log('cant find hisInfos')
+                socket.emit('new-msg', 
+                {text : input.value, from : props.hisInfos.email , to: props.hisInfos.email}
+                );
+                input.value = '';
+                
             }
+        }else {
+            console.log('cant find hisInfos')
         }
-    return(
-        <div className={classes.chatBox}>
-        <div id="messages">
-        </div>
-        <Input id="msg" type="text"  className={classes.textInput} placeholder="Message Goes Here" onKeyUp={sendMessage} />
-        </div>
-    )
+    }
+
+        if(!isEmpty(props.hisInfos))
+        { 
+        return(
+                <div className={classes.chatBox}>
+                <div id="messages">
+                </div>
+                <Input id="msg" type="text"  className={classes.textInput} placeholder="Message Goes Here" onKeyUp={sendMessage} />
+                </div>
+        )
+    } else {
+        return(
+                <div className={classes.chatBox}>
+                 <p>please select a person to chat with</p>
+                </div>
+        )
+    }
 }
 
 export default ChatBox;

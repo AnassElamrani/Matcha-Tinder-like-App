@@ -20,8 +20,8 @@ const ChatList = (props) => {
             if(res.data.boards)
             {
                 var result = res.data.boards
-                console.log('boards', result);
-                console.log('...boards', ...result);
+                // console.log('boards', result);
+                // console.log('...boards', ...result);
                 setPeople([...result]);
             
             }
@@ -38,7 +38,7 @@ const ChatList = (props) => {
     }, [])
     
     
-    console.log('tijani', myInfos);
+    // console.log('tijani', myInfos);
     // console.log('people', people)
     const passHisInfos = (x) => {
         setHisInfos(x);
@@ -47,7 +47,7 @@ const ChatList = (props) => {
     return (
         <div>
         <Grid container spacing={1} style={{background: '#EEEEEE', height: '70vh'}}>
-        <Grid item md={2}>
+        <Grid item xs={2}>
             <h4>People</h4>
             <h4>Messages</h4>
             <hr />
@@ -71,13 +71,13 @@ const ChatList = (props) => {
             }
             </List>
         </Grid>
-        <Grid item md={8} style={{border: '0.5px white solid'}}>
+        <Grid item xs={8} style={{border: '0.5px white solid'}}>
         <ChatBox  
         myInfos={myInfos} 
         hisInfos={hisInfos}
         />
         </Grid>
-        <Grid item md={2}><h3>Profile & Utilitie</h3></Grid>
+        <Grid item xs={2}><h3>Profile & Utilitie</h3></Grid>
         </Grid>
         </div>
     )
