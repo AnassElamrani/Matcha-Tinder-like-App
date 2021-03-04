@@ -10,7 +10,7 @@ module.exports = class Chat {
 
     static peopleBoard(userId) {
        return db.execute(
-           'SELECT users.userName, users.email, imgProfil.image FROM users INNER JOIN imgProfil ON users.id = imgProfil.users_id WHERE users.id = ? AND imgProfil.pointer = 0', [userId]
+           'SELECT users.userName, users.id, imgProfil.image FROM users INNER JOIN imgProfil ON users.id = imgProfil.users_id WHERE users.id = ? AND imgProfil.pointer = 0', [userId]
            ) 
     }
 

@@ -36,6 +36,7 @@ import Home from "../../profil/Home"
 import EditProfil from "../../profil/editProfill"
 import Setting from "../../profil/setting"
 import History from "../../history/history"
+import SocketContext from "../../../start/SocketContext"
 
 const instance = Axios.create({ withCredentials: true });
 
@@ -90,6 +91,8 @@ const ResponsiveDrawer = (props) => {
   const [requiredProfilInfo, setRPI] = React.useState('');
   const [avatar, setAvatar] = React.useState('');
 
+  const socket = React.useContext(SocketContext);
+
   navigator.geolocation.getCurrentPosition((position) => {
     setLat(position.coords.latitude);
     setLong(position.coords.longitude);
@@ -117,7 +120,9 @@ const ResponsiveDrawer = (props) => {
             (err) => {}
           )
       }
-    }
+    } 
+    // socket
+    socket.emit('inResponsive', id);
   }
 
   React.useEffect(() => {
@@ -167,6 +172,10 @@ const ResponsiveDrawer = (props) => {
 
   const handelLogout = () => {
     instance.post("http://localhost:3001/logout");
+    instance.post("http://localhost:3001/chat/redisDeleteId", {userId:id})
+    .then((res) => {
+      console.log(res.data.totalofKeysRemoved)
+    }).catch((err) => console.log(err));
     props.logout();
   };
 
@@ -247,8 +256,8 @@ const ResponsiveDrawer = (props) => {
           if (!hidden) {
             return (
               <ListItem button key={id} disabled={disabled} onClick={onClick}>
-                <ListItemText style={{color: "purple"}} key={id + Math.random()} primary={text} />
                 {icon && <ListItemIcon style={{color: "purple"}}>{icon}</ListItemIcon>}
+                <ListItemText style={{color: "purple"}} key={id + Math.random()} primary={text} />
               </ListItem>
             )
           }
