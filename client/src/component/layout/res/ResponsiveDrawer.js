@@ -122,7 +122,7 @@ const ResponsiveDrawer = (props) => {
       }
     } 
     // socket
-    socket.emit('inResponsive', id);
+    // socket.emit('inResponsive', id);   
   }
 
   React.useEffect(() => {

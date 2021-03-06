@@ -27,15 +27,18 @@ const useStyles = makeStyles(() => ({
     
     
     const ChatBox = (props) => {
+        const classes = useStyles();
         
         const socket = React.useContext(SocketContext);
         // const socket = 
         React.useEffect(() => {
             // socket.emit('newConnection');
-            if(props.myInfos)
-                socket.emit('join', {id: props.myInfos.id});
+            console.log('myInfos', props.id);
+            if(props.id)
+            {
+                socket.emit('join', {id: props.id});
+            }
         }, [])
-        console.log('my', props.myInfos);
         console.log('his', props.hisInfos);
         socket.on('new_msg', (data) => {
             console.log('data', data);
@@ -43,7 +46,6 @@ const useStyles = makeStyles(() => ({
             var span = document.createElement('span');
             span.innerHTML = data.msg+'</br>';
             messages.appendChild(span);
-            // alert(data);
         })
         // {
         // socket.on('connect', () => {
@@ -55,7 +57,6 @@ const useStyles = makeStyles(() => ({
 
         // console.log('name:',props.name );
 
-        const classes = useStyles();
 
         const sendMessage = (e) => {
             e.preventDefault();
@@ -67,20 +68,33 @@ const useStyles = makeStyles(() => ({
                 if(e.keyCode === 13)
                 {
                     socket.emit('msg', {text:input.value, to: props.hisInfos.id});
+                    var messages = document.getElementById('messages');
+                    var span = document.createElement('span');
+                    span.innerHTML = 'you : ' + input.value + '</br>';
+                    messages.appendChild(span);
                     input.value = '';
-                    
                 }
             }else {
                 console.log('cant find hisInfos')
             }
         }
-    return(
-        <div className={classes.chatBox}>
+        if(props.hisInfos.id){
+
+            return(
+                <div className={classes.chatBox}>
         <div id="messages">
         </div>
         <Input id="msg" type="text"  className={classes.textInput} placeholder="Message Goes Here" onKeyUp={sendMessage} />
         </div>
     )
+    } else {
+
+        return(
+            <div className={classes.chatBox}>
+    <p>select the user you want to chat with</p>
+    </div>
+)
+    }
 }
 
 export default ChatBox;

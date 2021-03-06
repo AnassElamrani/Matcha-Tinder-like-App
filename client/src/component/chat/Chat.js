@@ -42,9 +42,26 @@ const ChatList = (props) => {
     const [hisInfos, setHisInfos] = React.useState({});
     const [myInfos, setMyInfos] = React.useState({})
 
+    console.log("*******", props.id);
+
+    const saveMyInfos = (value) => {
+      if(!myInfos)
+      {
+        setMyInfos(value);
+      }
+    }
+
     // getting people matched with (id, userName, profilPicture);
 
     React.useEffect(() => {
+      Axios.post('http://localhost:3001/chat/getConnectedUserInfos', {userId: props.id})
+      .then((res) => {
+        // if(!MyInfos)
+          if(res)
+            saveMyInfos(res.data.myInfos);
+        
+      }).catch((err) => {console.log(err)})
+
         Axios.post('http://localhost:3001/chat/people', {userId : props.id})
         .then((res) => {
             if(res.data.boards)
@@ -58,14 +75,7 @@ const ChatList = (props) => {
         }).catch((err) => {console.log(err)})
         //
 
-        Axios.post('http://localhost:3001/chat/getConnectedUserInfos', {userId: props.id})
-        .then((res) => {
-            if(res)
-                setMyInfos(res.data.myInfos);
-            else
-                setMyInfos({});
-        }).catch((err) => {console.log(err)})
-    }, [])
+    }, [myInfos])
 
     const passHisInfos = (x) => {
         setHisInfos(x);
@@ -107,7 +117,8 @@ const ChatList = (props) => {
             </List>
         </Grid>
         <Grid item md={8} style={{border: '0.5px white solid'}}>
-        <ChatBox  
+        <ChatBox
+        id={props.id}  
         myInfos={myInfos} 
         hisInfos={hisInfos}
         />

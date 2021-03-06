@@ -23,28 +23,41 @@ const io = require('socket.io')(http, {
 // we have to fetch for connected user Email To create a room and join the user to it!
 
 io.sockets.on('connection', (socket) => {
-    console.log('a user connected')
+    console.log('a user connected', socket.id)
     socket.on('join', (data) => {
-        socket.join(data.id);
-        // console.log(data.id , socket.id);
+        socket.join(data.id+'Room');
+        // client.SET(data.id, socket.id), redis.print;
+        console.log(data.id , socket.id);
     })
     socket.on('msg', (data) => {
-        io.sockets.in(data.to).emit('new_msg', {msg: data.text});
+        // console.log('msgto', data.to);
+        io.in(data.to+'Room').emit('new_msg', {msg: data.text});
+        // let socketId = '';
+        // client.get(data.to, function(err, reply) {
+            // reply is null when the key is missing
+            // console.log(reply);
+            // socketId = reply
+        //   });
+        //   console.log(socketId);
+        // io.to(socketId).emit("new_msg", data.text); 
     })
     socket.on('disconnect', () => {
         console.log('disconnect');
     })
-    socket.on('inResponsive', (id) => {
-        console.log(id, socket.id);
-        client.set(id, socket.id, redis.print);
-        client.set(id+'time', 'timeX', redis.print);
-        client.keys('*', function (err, keys) {
-            if (err) return console.log(err);
-            for(var i = 0, len = keys.length; i < len; i++) {
-              console.log(keys[i]);
-            }
-          }); 
-    });
+    // console.log('rooms', io.sockets);
+    // socket.on('inResponsive', (id) => {
+    //     console.log('inResponsive');
+    //     console.log(id, socket.id);
+    //     client.set(id, socket.id, redis.print);
+    //     client.set(id+'-'+'time', Date(), redis.print);
+    //     // console.log()
+    //     client.keys('*', function (err, keys) {
+    //         if (err) return console.log(err);
+    //         for(var i = 0, len = keys.length; i < len; i++) {
+    //           console.log(keys[i]);
+    //         }
+    //       }); 
+    // });
 })
 
 app.use(express.json());
@@ -63,8 +76,6 @@ client.on("error", (error) => {
     console.log('error', error);
 })
 
-// client.set("2", "000000", redis.print);
-// client.get("2", redis.print);
 
 // Images ***************************************************
 // need help of package path

@@ -8,6 +8,7 @@ import Profil from './profil'
 import Map from "./map"
 import Search from './search'
 import {
+  Badge, 
   Card,
   CardHeader,
   CardContent,
@@ -165,6 +166,7 @@ const Browsing = (props) => {
                           subheader={el.firstName + ' ' + el.lastName}
                         />
                         <CardContent>
+                          <Typography variant="h5" style={{color:"purple"}}>connected</Typography>
                           <Typography variant='h6'>Biography :</Typography>
                           <Typography
                             variant='body2'
