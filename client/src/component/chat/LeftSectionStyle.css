@@ -1,0 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=PT+Sans+Narrow&display=swap");
+
+div[class*='makeStyles-Left'] {
+
+  height: 70vh;
+  width: inherit;
+  /* background-color: red; */
+}
+/* .makeStyles-Left-2164 {
+} */
+div[class^='MuiTab-root-'], div[class*='MuiTab-root-']
+{
+  min-width: inherit;
+  width: inherit;
+}
+/* .MuiTab-root-767 {
+} */ */
+
+.MuiPaper-elevation4-308{
+    box-shadow: none; 
+}
+.MuiGrid-spacing-xs-1-504 > .MuiGrid-item-483 {
+  padding: 0px;
+}
+.MuiTab-root-767{
+  text-transform: capitalize;
+}

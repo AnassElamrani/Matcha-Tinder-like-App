@@ -3,6 +3,9 @@ import Axios from "axios";
 import ChatBox from "./ChatBox";
 import { Grid, Tabs, Tab, AppBar, Paper, List ,ListItem ,ListItemSecondaryAction ,ListItemText ,ListItemAvatar ,Checkbox ,Avatar, Badge, Hidden } from '@material-ui/core';
 import { makeStyles, withStyles } from '@material-ui/core';
+import { StylesProvider } from "@material-ui/core/styles";
+import FullWidthTabs from "./LeftSection";
+import "./LeftSectionStyle.css";
 
 // we have to get id of connected user & email of user to cha with;
 // ids will make the room's name
@@ -82,10 +85,12 @@ const ChatList = (props) => {
     }
     
     return (
+      <StylesProvider injectFirst>
         <div>
         <Grid container spacing={1} style={{background: '#EEEEEE', height: '70vh'}}>
         <Grid item md={2}>
-            <h4>People</h4>
+          <FullWidthTabs people={people} passHisInfos={passHisInfos} id={props.id}/>
+            {/* <h4>People</h4>
             <h4>Messages</h4>
             <hr />
             <List>
@@ -114,18 +119,19 @@ const ChatList = (props) => {
                     );
                 })
             }
-            </List>
+            </List> */}
         </Grid>
         <Grid item md={8} style={{border: '0.5px white solid'}}>
-        <ChatBox
+        {/* <ChatBox
         id={props.id}  
         myInfos={myInfos} 
-        hisInfos={hisInfos}
-        />
+        setHisInfos={setHisInfos}
+        /> */}
         </Grid>
         <Grid item md={2}><h3>Profile & Utilitie</h3></Grid>
         </Grid>
         </div>
+        </StylesProvider>
     )
 }
 
