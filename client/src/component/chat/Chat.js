@@ -43,52 +43,60 @@ const ChatList = (props) => {
 
     const [people, setPeople] = React.useState([]);
     const [hisInfos, setHisInfos] = React.useState({});
-    const [myInfos, setMyInfos] = React.useState({})
+    const [myInfos, setMyInfos] = React.useState({});
+    const [stopLoop, xx] = React.useState('');
 
-    console.log("*******", props.id);
-
-    const saveMyInfos = (value) => {
-      if(!myInfos)
-      {
-        setMyInfos(value);
+    function isEmpty(obj) {
+      for(var prop in obj) {
+        if(obj.hasOwnProperty(prop)) {
+          return false;
+        }
       }
+    
+      return JSON.stringify(obj) === JSON.stringify({});
     }
 
+    const saveMyInfos = (value) => {
+      if(isEmpty != false)
+        setMyInfos(value);
+    }
+    const passHisInfos = (x) => {
+      setHisInfos(x);}
+    
     // getting people matched with (id, userName, profilPicture);
-
+    
     React.useEffect(() => {
       Axios.post('http://localhost:3001/chat/getConnectedUserInfos', {userId: props.id})
       .then((res) => {
         // if(!MyInfos)
-          if(res)
-            saveMyInfos(res.data.myInfos);
+        if(res){
+          saveMyInfos(res.data.myInfos);
+        }
         
       }).catch((err) => {console.log(err)})
-
-        Axios.post('http://localhost:3001/chat/people', {userId : props.id})
-        .then((res) => {
-            if(res.data.boards)
-            {
-                var result = res.data.boards
-                console.log('boards', result);
-                console.log('...boards', ...result);
-                setPeople([...result]);
-            
-            }
-        }).catch((err) => {console.log(err)})
-        //
-
-    }, [myInfos])
-
-    const passHisInfos = (x) => {
-        setHisInfos(x);
-    }
+      
+      Axios.post('http://localhost:3001/chat/people', {userId : props.id})
+      .then((res) => {
+        if(res.data.boards)
+        {
+          var result = res.data.boards
+          console.log('boards', result);
+          console.log('...boards', ...result);
+          setPeople([...result]);
+          
+        }
+      }).catch((err) => {console.log(err)})
+      //
+      
+    }, [stopLoop])
+    
+    console.log("*******", hisInfos);
     
     return (
       <StylesProvider injectFirst>
         <div>
         <Grid container spacing={1} style={{background: '#EEEEEE', height: '70vh'}}>
-        <Grid item md={2}>
+        <Grid item md={3}>
           <FullWidthTabs people={people} passHisInfos={passHisInfos} id={props.id}/>
             {/* <h4>People</h4>
             <h4>Messages</h4>
@@ -121,14 +129,14 @@ const ChatList = (props) => {
             }
             </List> */}
         </Grid>
-        <Grid item md={8} style={{border: '0.5px white solid'}}>
-        {/* <ChatBox
+        <Grid item md={9}>
+        <ChatBox
         id={props.id}  
         myInfos={myInfos} 
         setHisInfos={setHisInfos}
-        /> */}
+        />
         </Grid>
-        <Grid item md={2}><h3>Profile & Utilitie</h3></Grid>
+        {/* <Grid item md={2}><h3>Profile & Utilitie</h3>ss</Grid> */}
         </Grid>
         </div>
         </StylesProvider>

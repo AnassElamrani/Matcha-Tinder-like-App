@@ -1,27 +1,25 @@
 @import url("https://fonts.googleapis.com/css2?family=PT+Sans+Narrow&display=swap");
 
-div[class*='makeStyles-Left'] {
-
+div[class^='makeStyles-Left'] {
+  
   height: 70vh;
-  width: inherit;
+  /* width: inherit; */
   /* background-color: red; */
 }
 /* .makeStyles-Left-2164 {
 } */
-div[class^='MuiTab-root-'], div[class*='MuiTab-root-']
+span[class^="MuiTab"]
 {
-  min-width: inherit;
-  width: inherit;
+  text-transform: capitalize;
 }
-/* .MuiTab-root-767 {
-} */ */
 
-.MuiPaper-elevation4-308{
-    box-shadow: none; 
-}
-.MuiGrid-spacing-xs-1-504 > .MuiGrid-item-483 {
+div[class^="MuiGrid-spacing"], div[class^="MuiGrid-item"] {
   padding: 0px;
 }
-.MuiTab-root-767{
-  text-transform: capitalize;
+
+div[class^="MuiGrid-grid"] {
+  max-width: unset;
+}
+header[class^="MuiPaper-elevation4-"] {
+  box-shadow: unset;
 }
