@@ -82,6 +82,8 @@ export default function FullWidthTabs(props) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
 
+  
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -102,7 +104,7 @@ export default function FullWidthTabs(props) {
             aria-label="full width tabs example"
           >
             <Tab label="Chats" {...a11yProps(0)} />
-            <Tab label="People" {...a11yProps(1)} />
+            <Tab label="People(matched)" {...a11yProps(1)} />
           </Tabs>
         </AppBar>
         <SwipeableViews
@@ -113,16 +115,16 @@ export default function FullWidthTabs(props) {
           <TabPanel value={value} index={0} dir={theme.direction}>
             Conversations.....
           </TabPanel>
-          <TabPanel value={value} index={1} dir={theme.direction}>
-            
+          <TabPanel id="99909090090" value={value} index={1} dir={theme.direction}>
+            <div>
 
-          <List>
+          <List id="0101010">
             {
-                props.people.map((item, index) => {
-                    const {userName, id, image} = item;
-                    const labelId = `checkbox-list-secondary-label-${index}`;
-                    return (
-                     <ListItem key={index} onClick={(e) => {props.setHisInfos({userName:userName, id:id, image:image})}}>
+              props.people.map((item, index) => {
+                const {userName, id, image} = item;
+                const labelId = `checkbox-list-secondary-label-${index}`;
+                return (
+                  <ListItem key={index} onClick={() => {props.passHisInfos({userName:userName, id:id, image:image})}}>
                          <ListItemAvatar>
                          <StyledBadge                      
                           overlap="circle"
@@ -134,16 +136,16 @@ export default function FullWidthTabs(props) {
                              <Avatar
                                  alt={`${userName} picture`}
                                  src={`http://localhost:3001/${image}`}
-                             />
+                                 />
                              </StyledBadge>
                          </ListItemAvatar>
                          <ListItemText id={labelId} primary={userName} />
                      </ListItem>   
                     );
-                })
-            }
+                  })
+                }
             </List>
-
+                </div>
           </TabPanel>
         </SwipeableViews>
       </div>

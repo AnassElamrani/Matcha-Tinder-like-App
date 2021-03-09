@@ -1,4 +1,5 @@
 const chat = require('../models/chat');
+const { response } = require('express');
 
 
 exports.people = async (req, res) => {
@@ -36,4 +37,44 @@ exports.getUserInfos = async (req, res) => {
     await chat.getUserInfos(userId).then((hadik) => {
         res.json({myInfos: hadik[0][0]});
     })
+}
+
+exports.saveMessage = async (req, res) => {
+    if(req.body.from && req.body.to, req.body.content)
+    {
+        var from = req.body.from;
+        var to = req.body.to;
+        var content = req.body.content;
+        await chat.saveMessage(from, to, content).then((hadik) => {
+            if(hadik)
+            {
+                if(hadik[0].affectedRows == 1)
+                    res.json({response: true});
+            }
+        })
+    }else {
+        res.json({response:false})
+    }
+}
+
+exports.getConversation = async (req, res) => {
+    if(req.body.user1 && req.body.user2)
+    {
+        
+        var user1 = req.body.user1;
+        var user2 = req.body.user2;
+        await chat.getConversation(user1, user2).then((hadik) => {
+            if(hadik[0].length != 0)
+            {
+                console.log('hadik.length', hadik[0].length);
+                console.log('hna', hadik[0][0]);
+                
+            } else{
+                // say hello ! if the conversation is empty.
+                console.log('EmptyHadik');
+            }
+        })
+    } else {
+        res.json({response: false})
+    }
 }

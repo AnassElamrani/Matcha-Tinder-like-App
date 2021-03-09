@@ -19,4 +19,17 @@ module.exports = class Chat {
             'SELECT * FROM users WHERE id = ?', [userId]
         );
     }
+
+    static saveMessage(from, to, content)
+    {
+        return db.execute(
+            'INSERT INTO conversations(id_from, id_to, content) VALUES (?, ?, ?)'
+        , [from, to, content]);
+    }
+
+    static getConversation(user1, user2)
+    {
+        return db.execute(
+            'SELECT * FROM conversations WHERE id_from = ? AND id_to = ? OR id_from = ? AND id_to = ?', [user1, user2, user2, user1]);
+    }
 }

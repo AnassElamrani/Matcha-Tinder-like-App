@@ -15,10 +15,14 @@ route.post('/getConnectedUserInfos', chatController.getUserInfos);
 
 // 
 
-route.post('/redisDeleteId', (req, res) => {
-    const totalofKeysRemoved = client.DEL(req.body.userId);
-    res.json({totalofKeysRemoved: totalofKeysRemoved});
-});
+// route.post('/redisDeleteId', (req, res) => {
+//     const totalofKeysRemoved = client.DEL(req.body.userId);
+//     res.json({totalofKeysRemoved: totalofKeysRemoved});
+// });
+
+route.post('/saveMessage', chatController.saveMessage);
+
+route.post('/getConversation', chatController.getConversation);
 
 
 module.exports = route;
