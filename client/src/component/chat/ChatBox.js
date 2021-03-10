@@ -36,20 +36,27 @@ const ChatBox = (props) => {
 
     const socket = React.useContext(SocketContext);
     React.useEffect(() => {
-        console.log('effect');
+        console.log('IDIDIDIDIDI', props.id);
         Axios.post('http://localhost:3001/chat/getConversation', {user1: props.id, user2: props.hisInfos.id})
-        .then((res) => {console.log('res', res)}).catch((err) => {console.log('ErR'+err)});
+        .then((res) => {
+            if(res.data.response.length != 0)
+                console.log('resConv', res.data.response);
+            if(res.data.response === "emptyConversation")
+                console.log("Say Hello");
+        })
+            .catch((err) => {console.log('ErR'+err)});
     }, [props.hisInfos])
-    React.useEffect(() => {
-        console.log('effect');
-        Axios.post('http://localhost:3001/chat/getConversation', {user1: props.id, user2: props.hisInfos.id})
-        .then((res) => {console.log('res', res)}).catch((err) => {console.log('ErR'+err)});
+
+    // React.useEffect(() => {
+        // console.log('effect');
+        // Axios.post('http://localhost:3001/chat/getConversation', {user1: props.id, user2: props.hisInfos.id})
+        // .then((res) => {console.log('res', res)}).catch((err) => {console.log('ErR'+err)});
         // console.log('myInfos', props.id);
     //     if(props.id)
     //     {
     //         socket.emit('join', {id: props.id});
         // }
-    }, [])
+    // }, [])
     // console.log('his', props.hisInfos);
     // socket.on('new_msg', (data) => {
     //     console.log('data', data);

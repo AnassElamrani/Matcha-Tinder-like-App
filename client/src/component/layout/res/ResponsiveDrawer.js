@@ -208,7 +208,7 @@ const ResponsiveDrawer = (props) => {
     },
     {
       id: 4,
-      text: 'History',
+      text: 'Visited Profiles',
       icon: <FaHistory />,
       onClick: () => history.push(`/history/${id}`),
       disabled: !requiredProfilInfo,

@@ -30,6 +30,6 @@ module.exports = class Chat {
     static getConversation(user1, user2)
     {
         return db.execute(
-            'SELECT * FROM conversations WHERE id_from = ? AND id_to = ? OR id_from = ? AND id_to = ?', [user1, user2, user2, user1]);
+            'SELECT * FROM conversations WHERE id_from = ? AND id_to = ? OR id_from = ? AND id_to = ? ORDER BY timestamp ASC', [user1, user2, user2, user1]);
     }
 }

@@ -67,11 +67,13 @@ exports.getConversation = async (req, res) => {
             if(hadik[0].length != 0)
             {
                 console.log('hadik.length', hadik[0].length);
-                console.log('hna', hadik[0][0]);
+                console.log('hna', hadik[0]);
+                res.json({response: hadik[0]});
                 
             } else{
                 // say hello ! if the conversation is empty.
                 console.log('EmptyHadik');
+                res.json({response: 'emptyConversation'});
             }
         })
     } else {
