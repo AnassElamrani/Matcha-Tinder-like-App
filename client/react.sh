@@ -1,1 +1,1 @@
-npm i react-router-dom axios @material-ui/core @material-ui/icons @material-ui/lab  @material-ui/data-grid moment react-leaflet leaflet node-geocoder react-beautiful-dnd react-responsive-carousel--force --save
+npm i react-router-dom axios @material-ui/core @material-ui/icons @material-ui/lab  @material-ui/data-grid moment react-leaflet leaflet node-geocoder react-beautiful-dnd react-responsive-carousel react-rating socket.io-client --force --save

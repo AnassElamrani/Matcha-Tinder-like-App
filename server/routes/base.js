@@ -60,6 +60,10 @@ route.post('/base/dltImg/:id', homeController.dltImg)
 
 route.post('/base/onlyImg/:id', homeController.onlyImg)
 
+route.post('/base/displayIndrager/:id', homeController.displayIndrager)
+
+route.post('/base/dltImgUser/:id', homeController.dltImgUser)
+
 // ??
 
 route.post('/base/tag/:id', homeController.tags)

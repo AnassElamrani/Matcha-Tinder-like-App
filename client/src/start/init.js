@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { Route, Switch } from "react-router-dom";
-import { ThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import Login from "../component/auth/Login";
 import Signup from "../component/auth/Sign-in";
 import Valid from "../component/auth/Valid";
 import SendForget from "../component/forget/sendForget";
 import Forget from "../component/forget/forget";
 import ResponsiveDrawer from "../component/layout/res/ResponsiveDrawer";
-import SocketContext from "./SocketContext";
-import { io } from "socket.io-client";
-const URL = "http://localhost:3001";
+import SocketContext from './SocketContext'
+import { io } from 'socket.io-client'
+const URL = 'http://localhost:3001'
 
-const socket = io(URL);
+const socket = io(URL)
 
 const Init = (props) => {
-  const [loggedin, setLoggedin] = useState(false);
-  
+  const [loggedin, setLoggedin] = useState(false)
+  const [lay3awn, setLay3awn] = React.useState(false)
+
   const login = () => {
     setLoggedin(!loggedin);
   };
   const logout = () => {
-    setLoggedin(!loggedin);
+    setLoggedin(false)
+    setLay3awn(false)
   };
-  // const connect = () => {
 
-  // }
+  const CancelToken = Axios.CancelToken
+  const source = CancelToken.source()
 
-  useEffect(() => {
-    Axios.get("http://localhost:3001/users/checkLogin", {
+  const checkLogin = React.useCallback(async () => {
+    await Axios.get("http://localhost:3001/users/checkLogin", {
       withCredentials: true,
+      cancelToken: source.token
     })
       .then((response) => {
         if (response.data.access === "Granted" && response.data.jwt)
@@ -40,18 +42,19 @@ const Init = (props) => {
       .catch((error) => {
         console.log(error);
       });
-  });
+  }, [source])
 
-  // const [darkMode, setDarkMode] = useState(false);
+  useEffect(() => {
+    checkLogin()
+    return () => {
+      if (source)
+        source.cancel("init")
+    }
+  }, [checkLogin, source]);
 
-  const darkTheme = createMuiTheme({
-    // palette: {
-    //   type: darkMode ? "dark" : "light",
-    // },
-  });
   return (
-    <ThemeProvider theme={darkTheme}>
-      {loggedin === false && (
+    <React.Fragment>
+      {loggedin === false ? (
         <Switch>
           <Route exact path='/Sign-up' component={Signup} />
           <Route path='/Login' component={() => <Login login={login} />} />
@@ -60,14 +63,18 @@ const Init = (props) => {
           <Route path='/forget/:frgId' component={Forget} />
           <Route path='/*' component={() => <Login login={login} />} />
         </Switch>
-      )}
-      {loggedin === true && (
+      ) : (
         <SocketContext.Provider value={socket}>
-          <ResponsiveDrawer logout={logout} loggedin={loggedin} />
+          <ResponsiveDrawer
+            logout={logout}
+            loggedin={loggedin}
+            lay3awn={lay3awn}
+            setLay3awn={setLay3awn}
+          />
         </SocketContext.Provider>
       )}
-    </ThemeProvider>
+    </React.Fragment>
   )
-};
+}
 
 export default Init;

@@ -46,4 +46,8 @@ module.exports = class Tag {
   static DeleteTags(id) {
     return db.execute('DELETE FROM tag_user WHERE users_id = ?', [id])
   }
+
+  static deleteTagUser(idUser, idTag) {
+    return db.execute('DELETE FROM tag_user WHERE users_id = ? AND tag_id = ?', [idUser, idTag])
+  }
 }

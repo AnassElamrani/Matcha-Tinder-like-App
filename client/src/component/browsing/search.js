@@ -1,10 +1,10 @@
 import React from 'react'
 import Axios from 'axios'
 import { withStyles } from '@material-ui/core/styles'
-import {TextField, Chip, Slider, Button, Dialog, Typography, IconButton } from '@material-ui/core'
-import MuiDialogTitle from '@material-ui/core/DialogTitle'
-import MuiDialogContent from '@material-ui/core/DialogContent'
-import MuiDialogActions from '@material-ui/core/DialogActions'
+import {TextField, Chip, Slider, Button, Dialog, Typography, IconButton, 
+  DialogTitle as MuiDialogTitle, DialogContent as MuiDialogContent,
+  DialogActions as MuiDialogActions
+} from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
@@ -71,6 +71,7 @@ const Search = (props) => {
   const [tag, setTag] = React.useState([])
   const [tag1, setTag1] = React.useState([])
   const [open, setOpen] = React.useState(false)
+  const [didMount, setDidMount] = React.useState(false)
 
   const handleClickOpen = (e) => {
     setOpen(true)
@@ -96,7 +97,6 @@ const Search = (props) => {
       geo: geo,
       tag: tag1
     }).then((res) => {
-      console.log(res.data)
       if (res.data) {
         props.setList(res.data)
         props.setList1(res.data)
@@ -127,8 +127,13 @@ const Search = (props) => {
       if (res.data)
         setTag(res.data)
     })
+    setDidMount(true);
+    return () => setDidMount(false);
   }, [props])
 
+  if (!didMount)
+    return null
+    
   return (
     <React.Fragment>
       <Button variant='outlined' color='primary' onClick={handleClickOpen}>
@@ -205,8 +210,8 @@ const Search = (props) => {
               <TextField
                 {...params}
                 variant='filled'
-                label='Size small'
-                placeholder='Favorites'
+                label='tags'
+                placeholder='Enter your favorite tags'
               />
             )}
           />

@@ -71,6 +71,41 @@ exports.editProfil = (req, res) => {
   if (Object.keys(toSend.input).length !== 0) res.json(toSend)
   else{
     User.UpdateProfilInfo(data);
+    data.tag.map((el) => {
+      Tag.tagExists(el.name).then(([tagRes]) => {
+        if (!tagRes.length) {
+          const tag = new Tag(null, el.name)
+          tag.save().then(() => {
+            Tag.tagExists(el.name).then((res) => {
+              res[0].map((id) => {
+                Tag.insertInTagUser(data.id, id.id)
+              })
+            })
+          })
+        } else {
+          Tag.tagIdModel(data.id, el.name).then(([userTag]) => {
+            if (!userTag.length) {
+              Tag.tagExists(el.name).then((res) => {
+                res[0].map((id) => {
+                  Tag.insertInTagUser(data.id, id.id)
+                })
+              })
+            }
+            else{
+              data.tag1.map(el => {
+                Tag.tagExists(el.name).then(([res]) => {
+                  res.map((id) => {
+                    Tag.deleteTagUser(data.id, id.id)
+                  })
+                })
+              })
+              
+            }
+          })
+          dataErr.msgTag = 'Already exists'
+        }
+      })
+    })
     dataErr.status = true
     res.json(dataErr);
   }
@@ -167,17 +202,14 @@ exports.allTags = async (req, res, next) => {
 
 exports.getImges = (req, res) => {
   const uploadDerictory = path.join("public/upload");
-  console.log(uploadDerictory);
   fs.readdir(uploadDerictory, (err, files) => {
     console.log(files);
     if (err) {
       res.json({ msg: err });
-      //   console.log(err)
     } else if (files.length === 0) {
       res.json({ msg: "No Images uploaded" });
     }
     return res.json({ files });
-    // console.log(file)
   });
 };
 
@@ -203,23 +235,34 @@ exports.checkIs1 = (req, res) => {
   })
 }
 
-exports.geo = (req, res) => {
+exports.geo = (req, res, next) => {
   var data = {},
     data = { ...req.body }
   data.id = req.params.id
   let word
+  data.latlng = { lat: req.body.lat, lng: req.body.long }
 
-  Geo.checkLocIs(data.id).then(([res]) => {
-    if (!res.length){
-      Helpers.geoLocal(data.lat, data.long).then(city => {
-        city.map(el => {
-          word = el.city.split(' ')
-          const geo = new Geo(null, data.id, word[0], data.lat, data.long)
-          geo.save();
+  if (req.body.lat !== false && req.body.long !== false) {
+    Geo.checkLocIs(data.id).then(([res]) => {
+      if (!res.length) {
+        Helpers.geoLocal(data.lat, data.long).then((city) => {
+          city.map((el) => {
+            word = el.city.split(' ')
+            const geo = new Geo(null, data.id, word[0], data.lat, data.long)
+            geo.save()
+          })
         })
-      })
-    }
-  })
+      } else {
+        Helpers.geoLocal(data.lat, data.long).then((city) => {
+          city.map((el) => {
+            word = el.city.split(' ')
+            data.city = word[0]
+            Geo.updateGeo(data)
+          })
+        })
+      }
+    })
+  }
 }
 
 // update locallisation
@@ -328,3 +371,33 @@ exports.onlyImg = async (req, res, next) => {
   await Img.DeleteImages(id)
   res.json({ status: true })
 }
+
+// display images inside the drager
+
+exports.displayIndrager = async (req, res, next) => {
+  const { id } = req.params
+  var data = []
+  await Img.displayAllImages(id).then(([res]) => {
+    res.map((el) => {
+      data.push(el.images)
+    })
+  })
+  res.json({images: data})
+}
+
+// delete images with help of el.name and id user
+
+
+exports.dltImgUser = async (req, res, next) => {
+  const { id } = req.params
+  const { image } = req.body
+  const uploadDerictory = path.join('public/upload')
+  var fs = require('fs')
+  var filePath = uploadDerictory + '/' + image
+  // console.log(filePath)
+  fs.unlinkSync(filePath)
+  await Img.DeleteImagesUsers(id, image)
+  res.json({ status: true })
+}
+
+// Brwqcgt2Q-50Iv4TCfGhIfile-1615400884139.jpeg

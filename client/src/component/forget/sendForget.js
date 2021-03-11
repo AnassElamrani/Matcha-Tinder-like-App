@@ -43,25 +43,23 @@ const SendForget = (props) => {
     const [valid, setValid] = useState(false)
 
     useEffect(() => {
-        if (valid) history.push('/Login')
+        if (valid) history.push('/Login') 
         // else history.push('/Sign-up')
     })
     const forgetPassword = async (e) => {
         e.preventDefault()
-        console.log("test")
         await Axios.post('users/sendForget', {
         email: email
         }).then((res) => {
           // 1 -first way to merge data
           // const err = res.data
           // setErr({...errMsg, ...res.data})
-
+          console.log(res.data)
           // 2 -first way to merge data
           setErr((prevState) => {
             // Object.assign would also work
             return { ...prevState, ...res.data }
           })
-          console.log(errMsg)
           if (errMsg.status === "success") setValid(!valid)
         })
     }

@@ -4,7 +4,6 @@ import { withRouter, Switch, Route } from "react-router-dom"
 import PropTypes from "prop-types"
 import "../../../start/styles.css"
 import {
-  Avatar, 
   Typography,
   Toolbar,
   AppBar,
@@ -20,23 +19,21 @@ import {
   // Badge
 } from "@material-ui/core"
 import {
-  Menu as MenuIcon
+  Menu as MenuIcon,
   // LocationOn
 } from "@material-ui/icons"
 import { makeStyles, useTheme } from "@material-ui/core/styles"
-import { FaHome, FaInfoCircle, FaHistory, FaHotjar, FaRegSun } from "react-icons/fa"
-import { AiFillMessage } from "react-icons/ai";
+import { FaHome, FaHistory, FaHotjar, FaRegSun,FaUsers } from "react-icons/fa"
 import { RiLogoutCircleLine } from "react-icons/ri"
-import { MdAccountCircle } from "react-icons/md"
-
-import About from "./About"
-import Chat from "../../chat/Chat"
-import Browsing from "../../browsing/browsing"
+import { AiFillMessage } from 'react-icons/ai'
+import Chat from '../../chat/Chat'
+import Browsing from '../../browsing/browsing'
 import Home from "../../profil/Home"
 import EditProfil from "../../profil/editProfill"
 import Setting from "../../profil/setting"
 import History from "../../history/history"
-import SocketContext from "../../../start/SocketContext"
+import AllProfil from "../../allProfil/likeProfil"
+import SocketContext from "../../../start/SocketContext";
 
 const instance = Axios.create({ withCredentials: true });
 
@@ -80,108 +77,125 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ResponsiveDrawer = (props) => {
-  const { history, window } = props;
-  const classes = useStyles();
-  const theme = useTheme();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [id, setId] = React.useState("");
-  const [lat, setLat] = React.useState(false);
-  const [long, setLong] = React.useState(false);
-  const [requiredProfilInfo, setRPI] = React.useState('');
-  const [avatar, setAvatar] = React.useState('');
+// anass part :
+// notification
 
+///////////////////////////////// Big steps ///////////////////////////////////////////////////////////
+// un utilisateur qui ne possede pas de photo ne doit pas pouvoir liker le profil d'une auter utilisateur
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////// try to do /////////////////////////////////////////////////////////////////
+// print images in drop so that can help to delete them
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// implimantation active users .............................///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// check all route with post man //////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// tag error man ba3d .... //////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+const ResponsiveDrawer = (props) => {
+  const { history, window } = props
+  const classes = useStyles()
+  const theme = useTheme()
+  const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [id, setId] = React.useState(0)
+  const [lat, setLat] = React.useState(false)
+  const [long, setLong] = React.useState(false)
+  const [requiredProfilInfo, setRPI] = React.useState('')
+  const [didMount, setDidMount] = React.useState(false)
   const socket = React.useContext(SocketContext);
 
-  navigator.geolocation.getCurrentPosition((position) => {
-    setLat(position.coords.latitude);
-    setLong(position.coords.longitude);
-  });
+// socket connected to set active users ////////////////////////////////////////////////////////
+  React.useEffect(() => {
+    if (id){
+      socket.emit("active", id)
+    }
+  }, [socket, id])
 
-  const func = async () => {
-    if (props.loggedin){
-      await instance.get('http://localhost:3001/base').then(
-        (response) => {
-          if (response.data.user.id !== undefined) {
-            setId(response.data.user.id)
-          }
-        },
-        (err) => {}
-      )
-      if (id !== '') {
-        instance
-          .post('http://localhost:3001/user/userInfoVerification', { userId: id })
-          .then(
-            (res) => {
-              if (res.data.status === true) {
-                setRPI(true)
-              } else setRPI(false)
-            },
-            (err) => {}
-          )
-      }
-    } 
-    // socket
-    // socket.emit('inResponsive', id);   
+////////////////////////////////////////////////////////////////////////////////////////////////
+  function success(pos) {
+    setLat(pos.coords.latitude)
+    setLong(pos.coords.longitude)
+    if (id1) navigator.geolocation.clearWatch(id1)
   }
 
-  React.useEffect(() => {
-      func()
-  })
+  const options = {
+    enableHighAccuracy: false,
+    timeout: 5000,
+    maximumAge: 0,
+  }
+
+  let id1 = navigator.geolocation.getCurrentPosition(success, () => {}, options)
+
+  const func = React.useCallback(async () => {
+    if (!didMount){
+      const CancelToken = Axios.CancelToken
+      const source = CancelToken.source()
+      let { data } = await instance.get('http://localhost:3001/base', {
+        cancelToken: source.token,
+      })
+      setId(data.user.id)
+      return () => {
+        if (source) source.cancel('test')
+      }
+    }
+  }, [didMount])
 
   React.useEffect(() => {
-    // Get Profile Img (for avatar)
-    if(id)
-    {
-      // console.log('avatar', avatar);
-      Axios.post('http://localhost:3001/user/getUserAvatar', {userId: id})
-      .then((res) => {
-        // console.log(res);
-        if(res.data.image)
-        {
-          setAvatar(res.data.image);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      })
+    func()
+    if (id !== 0) {
+      instance
+        .post('http://localhost:3001/user/userInfoVerification', { userId: id })
+        .then((res) => {
+          if (res.data.status === true) {
+            setRPI(true)
+          } else setRPI(false)
+        })
     }
-  })
+    setDidMount(true)
+    return () => {
+      setDidMount(false)
+    }
+  }, [func, props, id])
 
   const getLocIp = React.useCallback(() => {
     // get locallization with help of ip
     Axios.get('https://api.ipify.org?format=json').then(async (res) => {
-      await Axios.get(`http://ip-api.com/json/${res.data.ip}`).then(res => {
-        console.log(res.data)
-        setLat(res.data.lat);
-        setLong(res.data.lon);
+      await Axios.get(`http://ip-api.com/json/${res.data.ip}`).then((res) => {
+        setLat(res.data.lat)
+        setLong(res.data.lon)
       })
-      if (id) Axios.post(`base/localisation/${id}`, { lat: lat, long: long });
+      if (id) Axios.post(`base/localisation/${id}`, { lat: lat, long: long })
     })
   }, [id, lat, long])
 
   React.useEffect(() => {
-    // save the localization here
-    if (lat === false && long === false){
-      // hta l push after enablet
-      // getLocIp()
-    }else
-      if (id) Axios.post(`base/localisation/${id}`, { lat: lat, long: long });
-  }, [id, lat, long, getLocIp]);
+    // tal l push
+    // if (lat === false && long === false)
+    //   getLocIp()
+  }, [lat, long, getLocIp])
 
+  React.useEffect(() => {
+    if (lat !== false && long !== false && id)
+      Axios.post(`base/localisation/${id}`, { lat: lat, long: long })
+    
+    setDidMount(true)
+    return () => {
+      setDidMount(false)
+    }
+  }, [id, lat, long])
 
   const handelLogout = () => {
-    instance.post("http://localhost:3001/logout");
-    instance.post("http://localhost:3001/chat/redisDeleteId", {userId:id})
-    .then((res) => {
-      console.log(res.data.totalofKeysRemoved)
-    }).catch((err) => console.log(err));
-    props.logout();
-  };
+    socket.disconnect()
+    instance.post('http://localhost:3001/logout')
+    props.logout()
+  }
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+    setMobileOpen(!mobileOpen)
+  }
 
   const itemsListOne = [
     {
@@ -201,24 +215,23 @@ const ResponsiveDrawer = (props) => {
     },
     {
       id: 3,
-      text: 'Profile',
-      icon: <MdAccountCircle />,
+      text: 'Setting',
+      icon: <FaRegSun />,
       onClick: () => history.push(`/edit/${id}`),
       disabled: !requiredProfilInfo,
     },
     {
       id: 4,
-      text: 'Visited Profiles',
+      text: 'History',
       icon: <FaHistory />,
       onClick: () => history.push(`/history/${id}`),
       disabled: !requiredProfilInfo,
     },
-
     {
       id: 5,
-      text: 'Setting',
-      icon: <FaRegSun />,
-      onClick: () => history.push('/setting'),
+      text: 'Profil',
+      icon: <FaUsers />,
+      onClick: () => history.push('/allProfil'),
       disabled: !requiredProfilInfo,
     },
     {
@@ -228,24 +241,17 @@ const ResponsiveDrawer = (props) => {
       onClick: () => history.push('/chat'),
       disabled: !requiredProfilInfo,
     },
-    {
-      id: 7,
-      text: 'About',
-      icon: <FaInfoCircle />,
-      onClick: () => history.push('/about'),
-      disabled: !requiredProfilInfo,
-    },
   ]
   const itemsListTwo = [
     {
       id: 100,
-      text: "Logout",
+      text: 'Logout',
       icon: <RiLogoutCircleLine />,
       onClick: () => {
-        handelLogout();
+        handelLogout()
       },
     },
-  ];
+  ]
   const drawer = (
     <div>
       <div className={classes.toolbar} />
@@ -256,8 +262,8 @@ const ResponsiveDrawer = (props) => {
           if (!hidden) {
             return (
               <ListItem button key={id} disabled={disabled} onClick={onClick}>
-                {icon && <ListItemIcon style={{color: "purple"}}>{icon}</ListItemIcon>}
-                <ListItemText style={{color: "purple"}} key={id + Math.random()} primary={text} />
+                <ListItemText key={id + Math.random()} primary={text} />
+                {icon && <ListItemIcon>{icon}</ListItemIcon>}
               </ListItem>
             )
           }
@@ -280,7 +286,11 @@ const ResponsiveDrawer = (props) => {
   )
 
   const container =
-    window !== undefined ? () => window().document.body : undefined;
+    window !== undefined ? () => window().document.body : undefined
+
+  if (!didMount) {
+    return null
+  }
 
   return (
     <div className={classes.root}>
@@ -297,14 +307,8 @@ const ResponsiveDrawer = (props) => {
             <MenuIcon />
           </IconButton>
           <Typography className={classes.ty} variant='h6' noWrap>
-            matcha
+            Matcha
           </Typography>
-          {
-            (1 === 2) ?
-            <Avatar alt="Username" src={`http://localhost:3001/${avatar}`}/>
-            :
-            <Avatar alt="?" src={`http://localhost:3001/${avatar}`}/>
-          }
         </Toolbar>
       </AppBar>
       <nav className={classes.drawer} aria-label='mailbox folders'>
@@ -319,7 +323,7 @@ const ResponsiveDrawer = (props) => {
               paper: classes.drawerPaper,
             }}
             ModalProps={{
-              keepMounted: true
+              keepMounted: true,
             }}
           >
             {drawer}
@@ -340,12 +344,12 @@ const ResponsiveDrawer = (props) => {
       <main className={classes.content}>
         <div className={classes.toolbar} />
         <Switch>
-          <Route exact path='/edit/:id' component={EditProfil} />
           <Route
             exact
-            path='/chat'
-            render={(props) => <Chat id={id} />}
+            path='/edit/:id'
+            render={(props) => <EditProfil id={id} />}
           />
+          <Route exact path='/chat' render={(props) => <Chat id={id} />} />
           <Route
             exact
             path='/browsing/:id'
@@ -357,7 +361,11 @@ const ResponsiveDrawer = (props) => {
             path='/setting'
             component={(props) => <Setting id={id} />}
           />
-          <Route exact path='/about' component={About} />
+          <Route
+            exact
+            path='/allProfil'
+            component={(props) => <AllProfil id={id} />}
+          />
           {requiredProfilInfo === true ? (
             <Route exact path='/' render={(props) => <Browsing id={id} />} />
           ) : (

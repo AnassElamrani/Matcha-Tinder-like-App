@@ -1,11 +1,12 @@
 import React from 'react'
 import Axios from 'axios'
-import {Container, Typography} from '@material-ui/core'
-import { DataGrid, RowsProp, ColDef } from "@material-ui/data-grid"
 import moment from 'moment'
+import { Container, Typography } from '@material-ui/core'
+import { DataGrid, RowsProp, ColDef } from "@material-ui/data-grid"
 
 const History = (props) => {
     const [rowsData, setRows] = React.useState([])
+    const [didMount, setDidMount] = React.useState(false)
     const rows: RowsProp = rowsData
     const columns: ColDef[] = [
         { field: "id", hide: true },
@@ -21,7 +22,12 @@ const History = (props) => {
             if (Object.keys(rowsData).length === 0)
                 setRows([...rowsData, ...fieldToAdd])
         })
+        setDidMount(true);
+        return () => setDidMount(false);
     }, [rowsData, props.match.params.id])
+
+    if (!didMount)
+        return null
     return (
         <Container>
             <Typography display="block" align="center" gutterBottom component='h1' variant='h5'>History</Typography>

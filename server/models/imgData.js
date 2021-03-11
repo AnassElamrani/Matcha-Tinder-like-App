@@ -46,4 +46,15 @@ module.exports = class Img {
   static selectImg(id) {
     return db.execute('SELECT * from imgProfil WHERE `users_id` = ?', [id])
   }
+
+  static displayAllImages(id) {
+    return db.execute(
+      'SELECT GROUP_CONCAT(image ORDER BY pointer ASC SEPARATOR ",") as images from imgProfil i WHERE i.users_id = ?',
+      [id]
+    )
+  }
+
+  static DeleteImagesUsers(id, image) {
+    return db.execute('DELETE FROM imgProfil WHERE users_id = ? AND image = ?', [id, image])
+  }
 }

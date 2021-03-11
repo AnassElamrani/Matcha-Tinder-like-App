@@ -36,7 +36,6 @@ const RangeSlider = (props) =>  {
     const newList3 = newList2.filter(
       (item) => item.tag >= tag
     );
-    console.log(newList3)
     props.setList1(newList3);
   }
   

@@ -1,6 +1,7 @@
 import React from 'react'
 import Axios from 'axios'
-import { makeStyles } from '@material-ui/core/styles'
+// import moment from 'moment'
+import { makeStyles, withStyles } from '@material-ui/core/styles'
 import Filter from './filter'
 import SortComponent from './sort'
 import clsx from 'clsx'
@@ -8,23 +9,33 @@ import Profil from './profil'
 import Map from "./map"
 import Search from './search'
 import {
-  Badge, 
-  Card,
-  CardHeader,
-  CardContent,
-  CardActions,
+  Card, CardHeader, CardContent, CardActions,Badge,
   // Collapse,
-  Avatar,
-  IconButton,
-  Typography,
-  Container,
-  Grid,
-  Box
+  Avatar, IconButton, Typography, Container, Grid
 } from '@material-ui/core'
 import {
   Favorite,
-  ThumbDown as ThumbDownIcon
+  ThumbDown as ThumbDownIcon,
+  SkipNext as SkipNextIcon,
 } from '@material-ui/icons'
+// import SocketContext from "../../start/SocketContext";
+
+const StyledBadge = withStyles((theme) => ({
+  // badge: (props) => 
+  //   props.status === "true"
+  //   ? {
+  //       backgroundColor: '#A9A9A9',
+  //       boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+  //       '&::after': {
+  //         border: '1px',
+  //       },
+  //     }
+  //   : {
+  //       backgroundColor: '#44b700',
+  //       color: '#44b700',
+  //       boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+  //     },
+}))(Badge)
 
 const useStyles = makeStyles((theme) => ({
   diva: {
@@ -32,14 +43,22 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
   },
   container: {
-    fontFamily: "Comfortaa"
+    fontFamily: 'Comfortaa',
+
   },
   copy: {
-    marginBottom: theme.spacing(8),
+    // [theme.breakpoints.up("lg")]: {
+    //   marginLeft: theme.spacing(70),
+    // },
     textAlign: 'center',
   },
   root: {
-    maxWidth: 345,
+    // height: '35vh',
+    // width: '50vh',
+    backgroundColor: '#FFFAFA',
+    color: '#778899',
+    boxShadow: `10px 10px 10px #A9A9A9`,
+    maxWidth: 395,
   },
   media: {
     height: 0,
@@ -58,6 +77,9 @@ const useStyles = makeStyles((theme) => ({
   expandOpen: {
     transform: 'rotate(180deg)',
   },
+  date: {
+    paddingRight: '13vw'
+  },
 }))
 
 const Browsing = (props) => {
@@ -66,6 +88,12 @@ const Browsing = (props) => {
   const classes = useStyles()
   const [list, setList] = React.useState([])
   const [list1, setList1] = React.useState([])
+  // const [status, setStatus] = React.useState("true")
+  // const [curTime, setcurTime] = React.useState()
+  const [didMount, setDidMount] = React.useState(false)
+  // const [active, setActive] = React.useState("")
+  // const socket = React.useContext(SocketContext);
+  // new Date().toLocaleString()
 
   const getLocalisation = React.useCallback(async () => {
     await Axios.post(`/browsing/geo/${props.id}`).then((res) => {
@@ -80,25 +108,34 @@ const Browsing = (props) => {
         cord: cord,
         gender: gender,
       }).then((res) => {
-        console.log(res.data)
         if (res.data){
           setList(res.data)
           setList1(res.data)  
         }
       })
     } else getLocalisation()
+    setDidMount(true);
+    return () => setDidMount(false);
   }, [cord, gender, getLocalisation, props.id])
 
   const handelLike = (event, idLiker, idLiked) => {
     event.preventDefault()
     Axios.post(`/browsing/likes/${idLiker}`, {idLiked: idLiked}).then(res => {
-      console.log(res.data)
       if (res.data.status) {
         const newList = list1.filter((item) => item.id !== idLiked)
         setList1(newList)
       }
     })
   }
+
+  const handelSkip = (event, idLiked) => {
+    event.preventDefault()
+    const newList = list1.filter((item) => item.id !== idLiked)
+    setList1(newList)
+    if (list1.length === 1)
+      getLocalisation()
+  }
+  
 
   const handelDeslike = (event, idLiker, idLiked) => {
     event.preventDefault()
@@ -109,6 +146,37 @@ const Browsing = (props) => {
       }
     })
   }
+
+  // mochkiill to solve
+
+  // const handelClick = async (e) => {
+  //   console.log(e)
+  //   // if (status === 'true'){
+  //   //   setStatus('false')
+  //   //   setcurTime()
+  //   // }else{
+  //   //   setStatus('true')
+  //   //   setcurTime(new Date())
+  //   // }
+
+  //   await socket.on("getActive", (data) => {
+  //     console.log(data)
+  //     // if (data !== "")
+  //     //   setActive(data)
+  //   })
+  // }
+  
+  // React.useEffect(() => {
+  //   console.log(active)
+  //   if (active === props.id.toString()) {
+  //     console.log(active)
+  //     setStatus('false')
+  //     setcurTime()
+  //   }
+  // }, [active, props])
+
+  if (!didMount)
+    return null
 
   return (
     <div className={classes.diva}>
@@ -122,7 +190,7 @@ const Browsing = (props) => {
           <SortComponent setList={setList1} list={list1} />
         </Grid>
         <Grid item xs={12} sm={2}>
-          <Map list={list1} />
+          <Map list={list} />
         </Grid>
         <Grid item xs={12} sm={2}>
           <Search
@@ -136,71 +204,97 @@ const Browsing = (props) => {
         <Grid item xs={12} sm={5}>
           <Filter setList1={setList1} list={list} />
         </Grid>
-        <Container className={classes.copy} component='main' maxWidth='xs'>
-          <Grid item xs={12} sm={12}>
-            {list1 &&
-              list1
-                .map((el, key) => {
-                  const imageProfil = el.images.split(',')
-                  return (
-                    <Box m={2} key={key}>
-                      <Card className={classes.root}>
-                        <CardHeader
-                          avatar={
-                            <Avatar
-                              aria-label='recipe'
-                              src={`http://localhost:3001/${imageProfil[0]}`}
-                              alt={`test${imageProfil[0]}`}
-                            ></Avatar>
-                          }
-                          action={
-                            <IconButton aria-label='settings'>
-                              <Profil
-                                visitor={props.id}
-                                visited={el.id}
-                                element={el}
-                              />
-                            </IconButton>
-                          }
-                          title={el.userName}
-                          subheader={el.firstName + ' ' + el.lastName}
-                        />
-                        <CardContent>
-                          <Typography variant="h5" style={{color:"purple"}}>connected</Typography>
-                          <Typography variant='h6'>Biography :</Typography>
-                          <Typography
-                            variant='body2'
-                            color='textSecondary'
-                            component='p'
-                          >
-                            {el.bio}
-                          </Typography>
-                        </CardContent>
-                        <CardActions disableSpacing>
-                          <IconButton
-                            aria-label='add to favorites'
-                            onClick={(event) =>
-                              handelLike(event, props.id, el.id)
-                            }
-                          >
-                            <Favorite style={{ color: 'green' }} />
-                          </IconButton>
-                          <IconButton
-                            className={clsx(classes.expand)}
-                            aria-label='NotInterested'
-                            onClick={(event) =>
-                              handelDeslike(event, props.id, el.id)
-                            }
-                          >
-                            <ThumbDownIcon color='secondary' />
-                          </IconButton>
-                        </CardActions>
-                      </Card>
-                    </Box>
-                  )
-                })
-                .splice(0, 20)}
-          </Grid>
+        <Container className={classes.copy} component='main' fixed disableGutters>
+        {list1 &&
+            list1
+              .map((el, key) => {
+                const imageProfil = el.images.split(',')
+                return (
+                  <Card className={classes.root} key={key}>
+                    <CardHeader
+                      avatar={
+                        <StyledBadge
+                          overlap='circle'
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                          }}
+                          variant='dot'
+                          // status={status}
+                        >
+                          <Avatar
+                            aria-label='recipe'
+                            src={`http://localhost:3001/${imageProfil[0]}`}
+                            alt={`test${imageProfil[0]}`}
+                          />
+                        </StyledBadge>
+                      }
+                      action={
+                        <IconButton aria-label='settings'>
+                          <Profil
+                            visitor={props.id}
+                            visited={el.id}
+                            element={el}
+                            list={list1}
+                            setlist={setList1}
+                            StyledBadge={StyledBadge}
+                            // status={status}
+                            // curTime={curTime}
+                          />
+                        </IconButton>
+                      }
+                      title={el.userName}
+                      subheader={el.firstName + ' ' + el.lastName}
+                    />
+                    {/* {curTime && (
+                      <Typography
+                        variant='body2'
+                        display='initial'
+                        className={classes.date}
+                      >
+                        Last Seen {moment(curTime).fromNow()}
+                      </Typography>
+                    )} */}
+                    {/* <button onClick={handelClick}>Click</button> */}
+                    <CardContent>
+                      <Typography variant='h6'>Biography :</Typography>
+                      <Typography
+                        variant='body2'
+                        color='textSecondary'
+                        component='p'
+                      >
+                        {el.bio}
+                      </Typography>
+                    </CardContent>
+                    <CardActions disableSpacing>
+                      <IconButton
+                        aria-label='add to favorites'
+                        onClick={(event) =>
+                          handelLike(event, props.id, el.id)
+                        }
+                      >
+                        <Favorite style={{ color: 'green' }} />
+                      </IconButton>
+                      <IconButton
+                        aria-label='skip'
+                        onClick={(event) => handelSkip(event, el.id)}
+                      >
+                        <SkipNextIcon style={{ color: 'DarkBlue' }} />
+                      </IconButton>
+                      <IconButton
+                        className={clsx(classes.expand)}
+                        aria-label='NotInterested'
+                        onClick={(event) =>
+                          handelDeslike(event, props.id, el.id)
+                        }
+                      >
+                        <ThumbDownIcon color='secondary' />
+                      </IconButton>
+                    </CardActions>
+                  </Card>
+                )
+              })
+              .splice(0, 1)}
         </Container>
       </Grid>
     </div>

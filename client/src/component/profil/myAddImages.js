@@ -2,10 +2,12 @@ import React from 'react'
 import Axios from 'axios'
 import Size from '../helpers/size'
 import { Grid, Card, CardMedia } from '@material-ui/core'
+import { Button, Dialog, DialogActions, DialogTitle } from '@material-ui/core';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { makeStyles } from '@material-ui/core/styles'
-import { IoMdAddCircle } from 'react-icons/io'
-import { useState, useRef, useEffect } from 'react'
+import { IoMdAddCircle, IoIosRemoveCircleOutline } from 'react-icons/io'
+import { useEffect } from 'react'
+import AlertDialoge from './alertDialog'
 
 const intialItems = [
   {
@@ -68,17 +70,31 @@ const useStyles = makeStyles(() => ({
     width: '40px',
     height: '40px',
   },
+  media1: {
+    width: '200px',
+    height: '300px',
+  },
 }))
 
 const MyAddImages = (props) => {
   const classes = useStyles()
-  const [Items, UpdateItems] = useState(intialItems)
-  const imageRefs = useRef([])
-  const [ProfileImg, SetProfileImg] = useState(null)
-  const ProfImgRef = useRef(null)
-  const [effect, triggerEffect] = useState(false)
-  // const [isDD, SetIsDD] = useState(true);
-  // const [disabled, SetDisabled] = useState(true);
+  const [Items, UpdateItems] = React.useState(intialItems)
+  const imageRefs = React.useRef([])
+  const [ProfileImg, SetProfileImg] = React.useState(null)
+  const ProfImgRef = React.useRef(null)
+  const [effect, triggerEffect] = React.useState(false)
+  const [printImages, setprintImages] = React.useState([])
+  const [open, setOpen] = React.useState(false);
+  const [keyIndex, setKeyIndex] = React.useState()
+
+  const handleClickOpen = (index) => {
+    setKeyIndex(index)
+    setOpen(true);
+  }
+
+  const handleClose = () => {
+    setOpen(false);
+  }
 
   imageRefs.current = []
 
@@ -87,6 +103,38 @@ const MyAddImages = (props) => {
       imageRefs.current.push(el)
     }
   }
+
+  // display images inside dragar
+
+  React.useEffect(() => {
+      Axios.post(`/base/displayIndrager/${props.id}`).then((res) => {
+        if (!printImages.length && res.data.images[0] !== null)
+          setprintImages(res.data.images[0].split(','))
+      })
+  }, [props, printImages])
+
+  
+
+  React.useEffect(() => {
+    if (printImages !== ""){
+      printImages.map((el, iKey) => {
+        let srcImg = `http://localhost:3001/${el}`
+        if (iKey === 0) {
+          SetProfileImg(srcImg)
+        }
+        triggerEffect(!effect)
+        if (srcImg != null) {
+          var tmp = Items
+          tmp[iKey].value = srcImg
+          UpdateItems(tmp)
+          const gridId = imageRefs.current[iKey].id + 'img'
+          const grid = document.getElementById(gridId)
+          grid.style.background = 'url(' + srcImg + ')'
+          grid.style.backgroundSize = '200px 300px'
+        }
+      })
+    }
+  }, [printImages])
 
   // display of images
 
@@ -114,17 +162,21 @@ const MyAddImages = (props) => {
       else return false
     })
     return s
-  })
+  }, [props])
 
   useEffect(() => {
     fetchImgs().then((res) => {
       if (res) props.checkTotalImg()
     })
-    // if (fetchImgs())
-    //   props.checkTotalImg()
-  }, [fetchImgs, props])
+    if (ProfileImg) props.checkTotalImg()
+  }, [fetchImgs, props, ProfileImg])
 
   ////////////////////////////
+
+  const handleInsUpd = () => {
+    triggerInput(keyIndex)
+    setOpen(false)
+  }
 
   const triggerInput = (index) => {
     if (imageRefs.current[index]) {
@@ -181,9 +233,61 @@ const MyAddImages = (props) => {
     })
   }
 
+  const handleDeleteDialog = () => {
+    handelRemoveImg(keyIndex)
+    setOpen(false)
+  }
+
+  const handelRemoveImg = async (key) => {
+    console.log(printImages[key])
+    if (printImages[key] === undefined){
+      await Axios.post(`/base/displayIndrager/${props.id}`).then((res) => {
+        if (res.data.images[0] !== null){
+          res.data.images[0].split(',').map((el, Keyi) => {
+            if (key === Keyi)
+              Axios.post(`base/dltImgUser/${props.id}`, {image: el})
+          })
+        }
+      })
+    }else{
+      if (Items[key].value !== '' && key !== 0){
+        // if (key === 0) {
+        //   SetProfileImg('https://raw.githubusercontent.com/hassanreus/img/master/profilImageManWomen.jpg')
+        // }
+        var tmp = Items
+        tmp[key].value = ''
+        UpdateItems(tmp)
+        const gridId = imageRefs.current[key].id + 'img'
+        const grid = document.getElementById(gridId)
+        grid.style.background = 'url() #E0E4E9'
+        grid.style.backgroundSize = '200px 300px'
+        await Axios.post(`base/dltImgUser/${props.id}`, {image: printImages[key]})
+        const newList = printImages.filter((item, _key) => key !== _key)
+        // console.log(newList)
+        setprintImages(newList)
+      }
+    }
+  }
+
   return (
     <Size>
       <Grid container>
+        {/* {printImages !== "" && printImages.split(',').length >= 0
+          ? printImages.split(',').map((el, iKey) => {
+              let srcImg = `http://localhost:3001/${el}`
+              let altImg = `display all image loop${iKey}`
+              return (
+                <div key={iKey} className={classes.big}>
+                  <CardMedia
+                    className={classes.media1}
+                    image={srcImg}
+                    title={altImg}
+                  />
+                  <IoIosRemoveCircleOutline className={classes.addCircle} onClick={(event) => handelRemoveImg(event, iKey)}/>
+                </div>
+              )
+            })
+          : ''} */}
         <div style={{ overflowY: 'scroll', height: '600px' }}>
           <DragDropContext onDragEnd={handleOnDragEnd}>
             <Droppable droppableId='items'>
@@ -204,9 +308,7 @@ const MyAddImages = (props) => {
                             ref={provided.innerRef}
                             id={id + 'img'}
                             className={classes.big}
-                            onClick={() => {
-                              triggerInput(index)
-                            }}
+                            onClick={() => {handleClickOpen(index)}}
                           >
                             <input
                               name='file'
@@ -220,6 +322,8 @@ const MyAddImages = (props) => {
                               type='file'
                             />
                             {provided.placeholder}
+                            {/* {console.log(Object.keys(printImages.split(',')))}
+                            {Object.keys(printImages.split(',')) <= index ? <IoMdAddCircle className={classes.addCircle} /> : <IoIosRemoveCircleOutline className={classes.addCircle} onClick={(event) => handelRemoveImg(event, id)} />} */}
                             <IoMdAddCircle className={classes.addCircle} />
                           </div>
                         )}
@@ -231,6 +335,22 @@ const MyAddImages = (props) => {
             </Droppable>
           </DragDropContext>
         </div>
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Choose your action:"}</DialogTitle>
+          <DialogActions>
+            <Button onClick={handleInsUpd} color="primary">
+              Insert/Update
+          </Button>
+            <Button onClick={handleDeleteDialog} color="secondary" autoFocus>
+              Delete
+          </Button>
+          </DialogActions>
+        </Dialog>
         {/* <div
           ref={ProfImgRef}
           style={{ width: "400px", height: "600px", border: "1px black solid" }}
@@ -238,7 +358,7 @@ const MyAddImages = (props) => {
         </div> */}
         <Card className={classes.root}>
           <CardMedia
-            image="https://raw.githubusercontent.com/hassanreus/img/master/profilImageManWomen.jpg"
+            image='https://raw.githubusercontent.com/hassanreus/img/master/profilImageManWomen.jpg'
             title='Contemplative Reptile'
             // style={{ width: "400px", height: "600px" }}
             ref={ProfImgRef}

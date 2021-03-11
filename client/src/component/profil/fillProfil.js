@@ -1,7 +1,10 @@
 import React from "react";
 import Axios from "axios";
 import {
-  InputLabel,Select, MenuItem, FormHelperText,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
   Chip,
   Paper,
   Collapse,
@@ -50,32 +53,35 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const FillProfil = (props) => {
-  const initialValue = [{ validBio: undefined }]
-  const [value, setValue] = React.useState('male')
-  const [type, setType] = React.useState('women')
+  const initialValue = [{ validBio: undefined }];
+  const [value, setValue] = React.useState("male");
+  const [type, setType] = React.useState("women");
   const [biography, setBio] = React.useState("");
   const [tag, setTag] = React.useState("");
   const [errTag, setErrTag] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [open1, setOpen1] = React.useState(true);
   const [chipData, setChipData] = React.useState([]);
+  const [chipData1, setChipData1] = React.useState([]);
   const [dsbl, setDsbl] = React.useState(true);
-  const [errMsg, setErrMsg] = React.useState(initialValue)
-  const [age, setAge] = React.useState([])
-  const [age1, setAge1] = React.useState('')
-  const [active, setActive] = React.useState(false)
+  const [errMsg, setErrMsg] = React.useState(initialValue);
+  const [age, setAge] = React.useState([]);
+  const [age1, setAge1] = React.useState("");
+  const [active, setActive] = React.useState(false);
 
-  
   const classes = useStyles(props);
 
   React.useEffect(() => {
-    setAge(range(18, 60))
-    props.checkSkip()
-    active ? props.checkTotalImg() : props.checkFill()
+    setAge(range(18, 60));
+    // props.checkSkip()
+    Axios.post(`base/alltag/${props.id}`).then((res) => {
+      if (res.data) setChipData(res.data);
+    });
+    active ? props.checkTotalImg() : props.checkFill();
   }, [props, active]);
 
   const fill = async (e, id, yes, no) => {
-    e.preventDefault()
+    e.preventDefault();
     await Axios.post(`base/tag/${id}`).then((res) => {
       for (var i = chipData.length - 1; i >= 0; i--) {
         for (var j = 0; j < res.data.length; j++) {
@@ -84,36 +90,34 @@ const FillProfil = (props) => {
         }
       }
     });
-    
+
     await Axios.post(`base/profil/${id}`, {
       age: age1,
       gender: value,
       type: type,
       bio: biography,
       tag: chipData,
+      tag1: chipData1
     })
       .then((res) => {
-        // console.log(res)
-        if (res.data.input)
-          setErrMsg(res.data.input)
-        else
-          setErrMsg({ validBio: undefined, validTag: undefined })
+        if (res.data.input) setErrMsg(res.data.input);
+        else setErrMsg({ validBio: undefined, validTag: undefined });
         if (res.data.status) {
-          setActive(true)
-          yes()
-        }else{
-          setActive(false)
-          no()
+          setActive(true);
+          yes();
+        } else {
+          setActive(false);
+          no();
         }
       })
-      .catch((error) => {})
+      .catch((error) => {});
   };
 
   const range = (start, end) => {
     return Array(end - start + 1)
       .fill()
-      .map((_, idx) => start + idx)
-  }
+      .map((_, idx) => start + idx);
+  };
 
   const handelTag = (e) => {
     setTag(e.target.value);
@@ -136,25 +140,30 @@ const FillProfil = (props) => {
     }
   };
 
+  // const handleDelete = (chipToDelete) => () => {
+  //   setChipData((chips) =>
+  //     chips.filter((chip) => chip.key !== chipToDelete.key)
+  //   );
+  // };
+
   const handleDelete = (chipToDelete) => () => {
-    setChipData((chips) =>
-      chips.filter((chip) => chip.key !== chipToDelete.key)
-    );
+    setChipData((chips) => chips.filter((chip) => chip.key !== chipToDelete.key))
+    setChipData1(data => ([ ...data ,chipToDelete]))
   };
-  
+
   const handleChange = (event) => {
-    setAge1(event.target.value)
-  }
+    setAge1(event.target.value);
+  };
 
   return (
     <Size>
-      <Container className={classes.copy} component='main' maxWidth='xs'>
-        <Typography className={classes.typo} component='h1' variant='h5'>
+      <Container className={classes.copy} component="main" maxWidth="xs">
+        <Typography className={classes.typo} component="h1" variant="h5">
           Fill profil
         </Typography>
         <div className={classes.paper}>
           <form
-            method='POST'
+            method="POST"
             onSubmit={(event) =>
               fill(event, props.id, props.checkTotalImg, props.checkFill)
             }
@@ -162,10 +171,10 @@ const FillProfil = (props) => {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label='Biography'
+                  label="Biography"
                   multiline
                   rows={3}
-                  variant='outlined'
+                  variant="outlined"
                   value={biography}
                   onChange={(e) => setBio(e.target.value)}
                   helperText={errMsg.validBio}
@@ -173,23 +182,23 @@ const FillProfil = (props) => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Collapse in={open}>
+                {/* <Collapse in={open}>
                   <TextField
-                    label='Add New Tag'
+                    label="Add New Tag"
                     multiline
-                    variant='outlined'
+                    variant="outlined"
                     value={tag}
                     onChange={(e) => handelTag(e)}
                     helperText={errTag}
-                    error={errTag !== ''}
+                    error={errTag !== ""}
                   />
                   <Button
-                    variant='outlined'
-                    color='secondary'
+                    variant="outlined"
+                    color="secondary"
                     onClick={() => {
-                      setOpen(false)
-                      setOpen1(true)
-                      addToOption(tag)
+                      setOpen(false);
+                      setOpen1(true);
+                      addToOption(tag);
                     }}
                     disabled={dsbl}
                   >
@@ -199,17 +208,17 @@ const FillProfil = (props) => {
                 <Collapse in={open1}>
                   <Button
                     disabled={open}
-                    variant='outlined'
-                    color='secondary'
+                    variant="outlined"
+                    color="secondary"
                     onClick={() => {
-                      setOpen(true)
-                      setOpen1(false)
+                      setOpen(true);
+                      setOpen1(false);
                     }}
                   >
                     New Tag
                   </Button>
                 </Collapse>
-                <Paper component='ul' className={classes.root}>
+                <Paper component="ul" className={classes.root}>
                   {chipData &&
                     chipData.map((data) => {
                       return (
@@ -220,9 +229,62 @@ const FillProfil = (props) => {
                             className={classes.chip}
                           />
                         </li>
-                      )
+                      );
                     })}
-                  <Typography color='secondary'>
+                  <Typography color="secondary">
+                    {chipData && errMsg.validTag}
+                  </Typography>
+                </Paper> */}
+                <Collapse in={open}>
+                  <TextField
+                    label="Add New Tag"
+                    multiline
+                    variant="outlined"
+                    value={tag}
+                    onChange={(e) => handelTag(e)}
+                    helperText={errTag}
+                    error={errTag !== ""}
+                  />
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => {
+                      setOpen(false);
+                      setOpen1(true);
+                      addToOption(tag);
+                    }}
+                    disabled={dsbl}
+                  >
+                    Add
+                  </Button>
+                </Collapse>
+                <Collapse in={open1}>
+                  <Button
+                    disabled={open}
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => {
+                      setOpen(true);
+                      setOpen1(false);
+                    }}
+                  >
+                    New Tag
+                  </Button>
+                </Collapse>
+                <Paper component="ul" className={classes.root1}>
+                  {chipData &&
+                    chipData.map((data) => {
+                      return (
+                        <li key={data.key}>
+                          <Chip
+                            label={data.name}
+                            onDelete={handleDelete(data)}
+                            className={classes.chip}
+                          />
+                        </li>
+                      );
+                    })}
+                  <Typography color="secondary">
                     {chipData && errMsg.validTag}
                   </Typography>
                 </Paper>
@@ -232,17 +294,17 @@ const FillProfil = (props) => {
                   className={classes.formControl}
                   error={errMsg.validAge !== undefined}
                 >
-                  <InputLabel id='demo-simple-select-required-label'>
+                  <InputLabel id="demo-simple-select-required-label">
                     Age
                   </InputLabel>
                   <Select
-                    labelId='demo-simple-select-required-label'
-                    id='demo-simple-select-required'
+                    labelId="demo-simple-select-required-label"
+                    id="demo-simple-select-required"
                     value={age1}
                     onChange={handleChange}
                     className={classes.selectEmpty}
                   >
-                    <MenuItem value=''>
+                    <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
                     {age.map((el, key) => {
@@ -250,77 +312,77 @@ const FillProfil = (props) => {
                         <MenuItem key={key} value={el}>
                           {el}
                         </MenuItem>
-                      )
+                      );
                     })}
                   </Select>
                   <FormHelperText>{errMsg.validAge}</FormHelperText>
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <FormControl component='fieldset'>
-                  <FormLabel component='legend'>Gender</FormLabel>
+                <FormControl component="fieldset">
+                  <FormLabel component="legend">Gender</FormLabel>
                   <RadioGroup
                     row
-                    aria-label='gender'
-                    name='gender1'
+                    aria-label="gender"
+                    name="gender1"
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                   >
                     <FormControlLabel
-                      value='women'
+                      value="women"
                       control={<Radio />}
-                      label='Women'
+                      label="Women"
                     />
                     <FormControlLabel
-                      value='male'
+                      value="male"
                       control={<Radio />}
-                      label='Male'
+                      label="Male"
                     />
                     <FormControlLabel
-                      value='other'
+                      value="other"
                       control={<Radio />}
-                      label='Other'
+                      label="Other"
                     />
                   </RadioGroup>
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <FormControl component='fieldset'>
-                  <FormLabel component='legend'>Sexual preferences</FormLabel>
+                <FormControl component="fieldset">
+                  <FormLabel component="legend">Sexual preferences</FormLabel>
                   <RadioGroup
                     row
-                    aria-label='type'
-                    name='type1'
+                    aria-label="type"
+                    name="type1"
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   >
                     <FormControlLabel
-                      value='women'
+                      value="women"
                       control={<Radio />}
-                      label='Women'
+                      label="Women"
                     />
                     <FormControlLabel
-                      value='male'
+                      value="male"
                       control={<Radio />}
-                      label='Male'
+                      label="Male"
                     />
                     <FormControlLabel
-                      value='other'
+                      value="other"
                       control={<Radio />}
-                      label='Other'
+                      label="Other"
                     />
                   </RadioGroup>
                 </FormControl>
               </Grid>
             </Grid>
-            <Button type='submit' variant='outlined' className={classes.submit}>
+            <Button type="submit" variant="outlined" className={classes.submit}>
               DONE
             </Button>
           </form>
         </div>
       </Container>
     </Size>
-  )
+  );
 };
 
 export default FillProfil;

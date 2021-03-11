@@ -1,45 +1,37 @@
-import React, { Component } from "react";
+import React, { useEffect } from "react";
 import Axios from "axios";
-import { Button } from "@material-ui/core";
+import { makeStyles} from '@material-ui/core/styles'
+import { Container, CircularProgress } from '@material-ui/core'
 import history from "../../history/history";
 
-// contu nue to with button valid
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+    display: 'flex',
+    marginTop: 20
+  },
+}))
 
-class Valid extends Component {
-  state = {
-    verify: false,
-    msg: "",
-  };
-  // preventDefault = event => event.preventDefault()
+const Valid  = (props) => {
+  const classes = useStyles()
+  const [verify, setVerify] = React.useState(false)
 
-  handelConfirm = (id) => {
-    Axios.get(`users/confirm/${id}`).then((response) => {
-      let { status, msg } = response.data;
-      console.log(response.data.status);
-      if (status === "succes") this.setState({ verify: true, msg: msg });
-      else if (status === "verify") this.setState({ verify: true, msg: msg });
-    });
-  };
+  useEffect(() => {
+    Axios.get(`users/confirm/${props.match.params.cnfId}`).then((response) => {
+      let { status } = response.data
+      if (status === 'succes') setVerify(true)
+      else if (status === 'verify') setVerify(true)
+    })
 
-  componentDidUpdate() {
-    if (this.state.verify) history.push("/Login");
-  }
-
-  render() {
-    return (
-      <React.Fragment>
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={() => this.handelConfirm(this.props.match.params.cnfId)}
-        >
-          Valid
-        </Button>
-      </React.Fragment>
-    );
-  }
+    if (verify) history.push('/Login')
+  }, [props, verify])
+  return (
+    <React.Fragment>
+      <Container className={classes.root} maxWidth='sm'>
+        <CircularProgress />
+      </Container>
+    </React.Fragment>
+  )
 }
 
 export default Valid;

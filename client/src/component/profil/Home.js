@@ -1,10 +1,29 @@
 import React  from "react"
 import Axios from 'axios'
-import { Stepper, Step, StepLabel, Button, Typography } from "@material-ui/core"
+import { CircularProgress, Stepper, Step, StepLabel, Button, Typography } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 import FillProfil from './fillProfil'
 import MyAddImages from './myAddImages'
 import history from '../../history/history'
+
+
+
+// const triggerInput = (index) => {
+//   // console.log(printImages.split(',').length <= index)
+//   // if (printImages.split(',').length <= index) {
+//   //   console.log("test")
+//   // }
+//   if (imageRefs.current[index]) {
+//     imageRefs.current[index].click()
+//   }
+// }
+
+
+
+{/* (printImages.split(',').length > index) || (imageRefs.current[index].id) ? <IoIosRemoveCircleOutline className={classes.addCircle} onClick={(event) => handelRemoveImg(event, index)} /> */ }
+{/* <IoMdAddCircle className={classes.addCircle} /> */}
+{/* {printImages.split(',').length <= index ? <IoMdAddCircle className={classes.addCircle} /> : <IoIosRemoveCircleOutline className={classes.addCircle} onClick={(event) => handelRemoveImg(event, index)} />} */ }
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,12 +42,16 @@ function getSteps() {
   return ["Add Images", "Fill Profile Informations"];
 }
 
-function getStepContent(step, props, checkTI, checkNo, checkSkip) {
+function getStepContent(step, props, checkTI, checkNo) {
   switch (step) {
     case 0:
-        return <MyAddImages id={props.id} checkTotalImg={checkTI} />
+      return (
+        <MyAddImages id={props.id} checkTotalImg={checkTI} />
+      )
     case 1:
-      return <FillProfil id={props.id} checkTotalImg={checkTI} checkFill={checkNo} checkSkip={checkSkip}/>
+      return (
+        <FillProfil id={props.id} checkTotalImg={checkTI} checkFill={checkNo} />
+      )
     default:
       return 'Unknown step'
   }
@@ -39,8 +62,8 @@ const HorizontalLinearStepper = (props) => {
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps();
   const [stepOneFilled, setStepOneFilled] = React.useState('no')
-  const [activeSkip, setActiveSkip] = React.useState(false)
-  const [check, setCheck] = React.useState(false)
+  // const [activeSkip, setActiveSkip] = React.useState(false)
+  const [progress, setprogress] = React.useState(false)
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -65,9 +88,9 @@ const HorizontalLinearStepper = (props) => {
     setStepOneFilled('no')
   }
 
-  const skipBtnSkip = () => {
-    setActiveSkip(true)
-  }
+  // const skipBtnSkip = () => {
+  //   setActiveSkip(true)
+  // }
 
   const reloadFunc = React.useCallback(() => {
     if (activeStep === 0 && props.id) {
@@ -84,88 +107,88 @@ const HorizontalLinearStepper = (props) => {
 
   // check if data is already filled
 
-  React.useEffect(() => {
+  const funProgress = React.useCallback(async () => {
     if (props.id){
-      Axios.post(`/base/check1/${props.id}`).then(async (res) => {
-        if (res.data.status) await setCheck(true)
-      })
-    }
-    // if (check) history.push(`/edit/${props.id}`)
-  }, [props, check])
+      await Axios.post(`/base/check1/${props.id}`)
+      setprogress(true)
+    }else
+      setprogress(false)
+  }, [props])
+
+  React.useEffect(() => {
+    funProgress()
+  }, [funProgress, progress])
 
   return (
-    <div className={classes.root}>
-      <Stepper activeStep={activeStep}>
-        {steps.map((label, index) => {
-          return (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          )
-        })}
-      </Stepper>
-      <div>
-        {activeStep === steps.length ? (
-          <div>
-            <Typography
-              component={'span'}
-              variant={'body2'}
-              className={classes.instructions}
-            >
-              All steps completed - you&apos;re finished
-            </Typography>
-            <Button
-              onClick={(event) => handleReset(event, props.id)}
-              className={classes.button}
-            >
-              Reset
-            </Button>
-            <Button
-              onClick={(event) => handleDone(event, props.id)}
-              className={classes.button}
-              color='primary'
-            >
-              Done
-            </Button>
-          </div>
-        ) : (
-          <div>
-            <Typography
-              component={'span'}
-              variant={'body2'}
-              className={classes.instructions}
-            >
-              {getStepContent(
-                activeStep,
-                props,
-                checkTotalImg,
-                fillProfil,
-                skipBtnSkip
-              )}
-            </Typography>
+    
+  <div className={classes.root}>
+    {progress === false ? <CircularProgress disableShrink /> : 
+      <React.Fragment>
+        <Stepper activeStep={activeStep}>
+          {steps.map((label, index) => {
+            return (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            )
+          })}
+        </Stepper>
+        <div>
+          {activeStep === steps.length ? (
             <div>
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={handleNext}
-                className={classes.button}
-                disabled={activeSkip ? true : false}
+              <Typography
+                component={'span'}
+                variant={'body2'}
+                className={classes.instructions}
               >
-                {activeStep === steps.length - 1 ? 'Skip' : 'Skip'}
+                All steps completed - you&apos;re finished
+              </Typography>
+              <Button
+                onClick={(event) => handleReset(event, props.id)}
+                className={classes.button}
+              >
+                Reset
               </Button>
               <Button
-                variant='contained'
-                color='primary'
-                onClick={handleNext}
+                onClick={(event) => handleDone(event, props.id)}
                 className={classes.button}
-                disabled={stepOneFilled === 'no' ? true : false}
+                color='primary'
               >
-                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                Done
               </Button>
             </div>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div>
+              <Typography
+                component={'span'}
+                variant={'body2'}
+                className={classes.instructions}
+              >
+                {getStepContent(
+                  activeStep,
+                  props,
+                  checkTotalImg,
+                  fillProfil
+                  // skipBtnSkip
+                )}
+              </Typography>
+              <div>
+                
+                <Button
+                  variant='contained'
+                  color='primary'
+                  onClick={handleNext}
+                  className={classes.button}
+                  disabled={stepOneFilled === 'no' ? true : false}
+                >
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </React.Fragment>
+    }
     </div>
   )
 }

@@ -27,9 +27,10 @@ module.exports = class Geo {
     if (gender === 'Other')
       setGender = `(u.gender = 'Male' OR u.gender = "Women")`
     else setGender = `u.gender = "${gender}"`
+
     return db.execute(
-      `SELECT DISTINCT(u.id), u.fameRating, l.lat, l.long, l.city, u.gender, u.userName, u.firstName, u.lastName, u.age, u.bio, ST_Distance_Sphere(point(?, ?), point (l.long, l.lat)) / 1000 AS km , (SELECT COUNT(*) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id WHERE t1.users_id = ? AND t2.users_id = u.id) as tag, (SELECT GROUP_CONCAT(image ORDER BY pointer ASC SEPARATOR ',') from imgProfil i WHERE i.users_id = u.id) as images from users as u INNER JOIN location as l on u.id = l.users_id INNER JOIN imgProfil as i1 on u.id = i1.users_id WHERE u.id <> ? AND u.status <> 1 AND NOT EXISTS (SELECT * from likes lk WHERE ? = lk.liker AND u.id = lk.liked) AND NOT EXISTS (SELECT * from blocked bl WHERE ? = bl.blocker AND u.id = bl.blocked) AND ${setGender} AND ST_Distance_Sphere(point(?, ?), point (l.long , l.lat)) / 1000 < 100 ORDER By tag DESC, u.fameRating DESC`,
-      [cord[1], cord[0], id, id, id, id, cord[1], cord[0]]
+      `SELECT DISTINCT(u.id), u.fameRating, l.lat, l.long, l.city, u.gender, u.userName, u.firstName, u.lastName, u.age, u.bio, ST_Distance_Sphere(point(?, ?), point (l.long, l.lat)) / 1000 AS km , (SELECT GROUP_CONCAT(t3.name) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id INNER JOIN tag t3 ON t1.tag_id = t3.id WHERE t1.users_id = ? AND t2.users_id = u.id) as tag1, (SELECT COUNT(*) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id WHERE t1.users_id = ? AND t2.users_id = u.id) as tag, (SELECT GROUP_CONCAT(image ORDER BY pointer ASC SEPARATOR ',') from imgProfil i WHERE i.users_id = u.id) as images from users as u INNER JOIN location as l on u.id = l.users_id INNER JOIN imgProfil as i1 on u.id = i1.users_id WHERE u.id <> ? AND u.status <> 1 AND NOT EXISTS (SELECT * from likes lk WHERE ? = lk.liker AND u.id = lk.liked) AND NOT EXISTS (SELECT * from blocked bl WHERE ? = bl.blocker AND u.id = bl.blocked) AND ${setGender} AND ST_Distance_Sphere(point(?, ?), point (l.long , l.lat)) / 1000 < 100 AND (SELECT GROUP_CONCAT(t3.name) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id INNER JOIN tag t3 ON t1.tag_id = t3.id WHERE t1.users_id = ? AND t2.users_id = u.id) IS NOT NULL ORDER By tag DESC, u.fameRating DESC`,
+      [cord[1], cord[0], id, id, id, id, id, cord[1], cord[0], id]
     )
   }
 
@@ -58,7 +59,6 @@ module.exports = class Geo {
     else setGender = `u.gender = "${gender}"`
     
     let stringTag = `(`
-    
     if (tag.length !== 0){
       tag.map((el) => {
         if (el.name.charAt(0)) {
@@ -72,6 +72,13 @@ module.exports = class Geo {
     return db.execute(
       `SELECT DISTINCT(u.id), u.fameRating, l.lat, l.long, l.city, u.gender, u.userName, u.firstName, u.lastName, u.age, u.bio, ST_Distance_Sphere(point(?, ?), point (l.long, l.lat)) / 1000 AS km , (SELECT GROUP_CONCAT(t3.name) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id INNER JOIN tag t3 ON t1.tag_id = t3.id WHERE t1.users_id = ? AND t2.users_id = u.id AND ${stringTag}) as tag1,(SELECT COUNT(*) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id WHERE t1.users_id = 1 AND t2.users_id = u.id) as tag,(SELECT GROUP_CONCAT(image ORDER BY pointer ASC SEPARATOR ',') from imgProfil i WHERE i.users_id = u.id) as images from users as u INNER JOIN location as l on u.id = l.users_id INNER JOIN imgProfil as i1 on u.id = i1.users_id WHERE u.id <> ? AND u.status <> 1 AND NOT EXISTS (SELECT * from likes lk WHERE ? = lk.liker AND u.id = lk.liked) AND NOT EXISTS (SELECT * from blocked bl WHERE ? = bl.blocker AND u.id = bl.blocked) AND ${setGender} AND ST_Distance_Sphere(point(?, ?), point (l.long, l.lat)) / 1000 <= 100 AND u.age BETWEEN ${age[0]} AND ${age[1]} AND ST_Distance_Sphere(point(?, ?), point (l.long, l.lat)) / 1000 <= ${geo} AND u.fameRating <= ${rating} AND (SELECT GROUP_CONCAT(t3.name) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id INNER JOIN tag t3 ON t1.tag_id = t3.id WHERE t1.users_id = ? AND t2.users_id = u.id AND ${stringTag}) IS NOT NULL ORDER By tag DESC, u.fameRating DESC`,
       [cord[1], cord[0], id, id, id, id, cord[1], cord[0], cord[1], cord[0], id]
+    )
+  }
+
+  static allProfilData(cord, gender, id) {
+    return db.execute(
+      `SELECT DISTINCT(u.id), u.fameRating, l.lat, l.long, l.city, u.gender, u.userName, u.firstName, u.lastName, u.age, u.bio, ST_Distance_Sphere(point(?, ?), point (l.long, l.lat)) / 1000 AS km , (SELECT GROUP_CONCAT(t3.name) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id INNER JOIN tag t3 ON t1.tag_id = t3.id WHERE t1.users_id = ? AND t2.users_id = u.id) as tag1, (SELECT COUNT(*) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id WHERE t1.users_id = 1 AND t2.users_id = u.id) as tag, (SELECT GROUP_CONCAT(image ORDER BY pointer ASC SEPARATOR ',') from imgProfil i WHERE i.users_id = u.id) as images from users as u INNER JOIN location as l on u.id = l.users_id INNER JOIN imgProfil as i1 on u.id = i1.users_id WHERE u.id <> ? AND u.status <> 1 AND EXISTS (SELECT * from likes lk WHERE ? = lk.liker AND u.id = lk.liked) AND NOT EXISTS (SELECT * from blocked bl WHERE ? = bl.blocker AND u.id = bl.blocked) AND ST_Distance_Sphere(point(?, ?), point (l.long , l.lat)) / 1000 < 100 AND (SELECT GROUP_CONCAT(t3.name) from tag_user t1 INNER JOIN tag_user t2 ON t1.tag_id = t2.tag_id INNER JOIN tag t3 ON t1.tag_id = t3.id WHERE t1.users_id = ? AND t2.users_id = u.id) IS NOT NULL ORDER By tag DESC, u.fameRating DESC`,
+      [cord[1], cord[0], id, id, id, id, cord[1], cord[0], id]
     )
   }
 }

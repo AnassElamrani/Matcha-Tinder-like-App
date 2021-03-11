@@ -22,7 +22,6 @@ const SortComponent = (props) => {
                 return undefined
           }
       })
-      console.log(newList1)
       props.setList(newList1)
     }
 

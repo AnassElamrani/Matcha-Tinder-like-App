@@ -17,42 +17,13 @@ CREATE TABLE IF NOT EXISTS location(`id` int(11) NOT NULL PRIMARY KEY AUTO_INCRE
 
 CREATE TABLE IF NOT EXISTS likes(`id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT, `liker` int(11) NOT NULL, `liked` int(11) NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
-CREATE TABLE IF NOT EXISTS matchs(`id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT, `liker` int(11) NOT NULL, `liked` int(11) NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)
+CREATE TABLE IF NOT EXISTS matchs(`id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT, `user1` int(11) NOT NULL, `user2` int(11) NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)
 
 CREATE TABLE IF NOT EXISTS blocked(`id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT, `blocker` int(11) NOT NULL, `blocked` int(11) NOT NULL,`dlt` int(11) NOT NULL DEFAULT 0, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)
 
 CREATE TABLE IF NOT EXISTS history(`id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT, `visitor_id` int(11) NOT NULL, `visited_id` int(11) NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)
 
--- UPDATE users
--- SET `fame rating` = `fame rating` + 100
--- WHERE id = 2
-
--- fill profil 100 -- like 20 -- match 150 -- chat 80
-
-
-
-
-
--- to complet
--- SELECT *, now() as date, HOUR(TIMEDIFF(created_at, now())) as `diff` from dislike WHERE HOUR(TIMEDIFF(created_at, now())) >= 5
-
--- working with triggers
--- DELIMITER $$
-
---     Create Trigger before_delete_dislike
---     AFTER UPDATE ON dislike FOR EACH ROW  
---     BEGIN  
---            IF HOUR(TIMEDIFF(created_at, now())) >= 5 THEN
---         BEGIN
---             DELETE FROM dislike WHERE HOUR(TIMEDIFF(created_at, now())) >= 5;
---         END;
---     END IF;
---    END;
--- $$
--- DELIMITER ;
-
-
--- create procedure to delete a row from table dislike
+CREATE TABLE IF NOT EXISTS report(`id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT, `reporter` int(11) NOT NULL, `reported` int(11) NOT NULL, `feedback` VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)
 
 DELIMITER //
 create procedure delete_like()

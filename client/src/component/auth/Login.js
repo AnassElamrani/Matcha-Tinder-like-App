@@ -6,7 +6,7 @@ import {
   Hidden,
   Checkbox,
   FormControlLabel,
-  // LockOutlinedIcon,
+  CircularProgress,
   Avatar,
   // CssBaseline,
   Button,
@@ -144,9 +144,9 @@ class Login extends Component {
     errMsg: {},
     userName: "",
     password: "",
-    redirect: null,
     data: [],
     disabled: false,
+    progress: false
   };
 
   onChange = (e) => {
@@ -167,27 +167,36 @@ class Login extends Component {
           this.setState({ errMsg: response.data.toSend });
         }
         else if (response.data.status === "success" && response.data.verified === true) {
-          this.setState({ redirect: "/" });
+          this.props.login();
+          history.push("/");
         }
       });
   };
 
+  CancelToken = Axios.CancelToken;
+  abortController = new AbortController();
+  source = this.CancelToken.source();
+  
   componentDidMount() {
     Axios.get("http://localhost:3001/users/checkLogin", {
-      withCredentials: true,
+      withCredentials: true
+      , cancelToken: this.source.token
     })
       .then((response) => {
-        if (response.data.jwt) this.setState({ redirect: "/" });
+        if (response.data.jwt) {
+          this.props.login();
+          history.push("/");
+        }
+        else this.setState({ progress: true })
       })
       .catch((error) => {
         console.log(error);
       });
   }
 
-  componentDidUpdate() {
-    if (this.state.redirect) {
-      this.props.login();
-      history.push("/");
+  componentWillUnmount() {
+    if (this.source.cancel){
+      this.source.cancel()
     }
   }
 
@@ -201,140 +210,144 @@ class Login extends Component {
     };
     return (
         <div className={classes.diva}>
-          <Grid container className={classes.container}>
-            <Hidden only={["xs", "sm"]}>
-              <Grid item className={classes.Gflex} md={4}>
-                <Box bgcolor="#ffffff" className={classes.boxeflex} flexGrow={2}>
-                </Box>
-                <Box flexGrow={8}>
-                  <img className={classes.img} src={img.src} alt="img" />
-                </Box>
-                <Box flexGrow={3} bgcolor="#ffffff" className={classes.boxeflex}>
-                </Box>
-              </Grid>
-            </Hidden>
-            <Grid container item md={8}>
-              <Hidden only="xs">
-                <Grid className={classes.top} container item> 
-                </Grid>
-              </Hidden>
-              <Hidden only="xs">
-                <Grid item sm={2}>
-                  <Box bgcolor="white" className={classes.boxes}></Box>
-                </Grid>
-              </Hidden>
-              <Grid className={classes.hadik} item sm={8}>
-                <div className={classes.paper}>
-                  <Avatar className={classes.avatar}></Avatar>
-                  <Typography
-                    className={classes.matcha}
-                    component="h1"
-                    variant="h6"
-                  >
-                    Sign in to Matcha
-                  </Typography>
-                  <div className={classes.oauth}>
-                    <Button
-                    href="http://localhost:3001/auth/42"
-                      className={classes.intra}
-                      // variant="text"
-                      startIcon={<IntraSvg />}
-                    >
-                      <Hidden only="xs">sign in with intra</Hidden>
-                    </Button>
-                    <Button
-                      size="large"
-                      href="http://localhost:3001/auth/facebook"
-                      className={classes.buttonOauth}
-                      variant="outlined"
-                    >
-                      <FaFacebookF />
-                    </Button>
-                    <Button
-                      size="large"
-                      href="http://localhost:3001/auth/google"
-                      className={classes.buttonOauth}
-                      variant="outlined"
-                    >
-                      <FaGoogle />
-                    </Button>
-                  </div>
-                  <div className={classes.or}>
-                    <div className={classes.leftline}></div>
-                    <div>Or</div>
-                    <div className={classes.rightline}></div>
-                  </div>
-                  <form method='POST' className={classes.form} onSubmit={this.login}>
-                  <Typography variant='subtitle2' gutterBottom color='secondary'>
-                    {this.state.errMsg.errorGlobal}
-                  </Typography>
-                    <TextField
-                      variant="outlined"
-                      margin="normal"
-                      required
-                      fullWidth
-                      id="inputUserName"
-                      label="User Name"
-                      name="userName"
-                      autoComplete="userName"
-                      autoFocus
-                      onChange={this.onChange.bind(this)}
-                      value={this.state.userName}
-                      helperText={this.state.errMsg.validUserNameErr}
-                      error={this.state.errMsg.validUserNameErr !== undefined}
-                    />
-                    <TextField
-                      variant="outlined"
-                      margin="normal"
-                      required
-                      fullWidth
-                      name="password"
-                      label="Password"
-                      type="password"
-                      id="inputPassword"
-                      autoComplete="current-password"
-                      onChange={this.onChange.bind(this)}
-                      value={this.state.password}
-                      helperText={this.state.errMsg.validPassErr}
-                      error={this.state.errMsg.validPassErr !== undefined}
-                    />
-                    <FormControlLabel
-                      control={<Checkbox value="remember" color="primary" />}
-                      label="Remember me"
-                    />
-                    <Button
-                      type="submit"
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      className={classes.submit}
-                    >
-                      Login
-                    </Button>
-                    <Grid container>
-                      <Grid item xs>
-                        <Typography variant="body2">
-                          <Link to="/sendForget">Forgot password?</Link>
-                        </Typography>
-                      </Grid>
-                      <Grid item>
-                        <Typography variant="body2">
-                          <Link to="/Sign-up">
-                            "Don't have an account? Sign Up"
-                          </Link>
-                        </Typography>
-                      </Grid>
+          {this.state.progress === false ? <CircularProgress disableShrink /> :
+            <React.Fragment>
+              <Grid container className={classes.container}>
+                <Hidden only={["xs", "sm"]}>
+                  <Grid item className={classes.Gflex} md={4}>
+                    <Box bgcolor="#ffffff" className={classes.boxeflex} flexGrow={2}>
+                    </Box>
+                    <Box flexGrow={8}>
+                      <img className={classes.img} src={img.src} alt="img" />
+                    </Box>
+                    <Box flexGrow={3} bgcolor="#ffffff" className={classes.boxeflex}>
+                    </Box>
+                  </Grid>
+                </Hidden>
+                <Grid container item md={8}>
+                  <Hidden only="xs">
+                    <Grid className={classes.top} container item> 
                     </Grid>
-                  </form>
-                </div>
-              </Grid>
-              <Hidden only="xs">
-                <Grid item sm={2}>
-                  <Box className={classes.boxes} bgcolor="white"></Box>
+                  </Hidden>
+                  <Hidden only="xs">
+                    <Grid item sm={2}>
+                      <Box bgcolor="white" className={classes.boxes}></Box>
+                    </Grid>
+                  </Hidden>
+                  <Grid className={classes.hadik} item sm={8}>
+                    <div className={classes.paper}>
+                      <Avatar className={classes.avatar}></Avatar>
+                      <Typography
+                        className={classes.matcha}
+                        component="h1"
+                        variant="h6"
+                      >
+                        Sign in to Matcha
+                      </Typography>
+                      <div className={classes.oauth}>
+                        <Button
+                        href="http://localhost:3001/auth/42"
+                          className={classes.intra}
+                          // variant="text"
+                          startIcon={<IntraSvg />}
+                        >
+                          <Hidden only="xs">sign in with intra</Hidden>
+                        </Button>
+                        <Button
+                          size="large"
+                          href="http://localhost:3001/auth/facebook"
+                          className={classes.buttonOauth}
+                          variant="outlined"
+                        >
+                          <FaFacebookF />
+                        </Button>
+                        <Button
+                          size="large"
+                          href="http://localhost:3001/auth/google"
+                          className={classes.buttonOauth}
+                          variant="outlined"
+                        >
+                          <FaGoogle />
+                        </Button>
+                      </div>
+                      <div className={classes.or}>
+                        <div className={classes.leftline}></div>
+                        <div>Or</div>
+                        <div className={classes.rightline}></div>
+                      </div>
+                      <form method='POST' className={classes.form} onSubmit={this.login}>
+                      <Typography variant='subtitle2' gutterBottom color='secondary'>
+                        {this.state.errMsg.errorGlobal}
+                      </Typography>
+                        <TextField
+                          variant="outlined"
+                          margin="normal"
+                          required
+                          fullWidth
+                          id="inputUserName"
+                          label="User Name"
+                          name="userName"
+                          autoComplete="userName"
+                          autoFocus
+                          onChange={this.onChange.bind(this)}
+                          value={this.state.userName}
+                          helperText={this.state.errMsg.validUserNameErr}
+                          error={this.state.errMsg.validUserNameErr !== undefined}
+                        />
+                        <TextField
+                          variant="outlined"
+                          margin="normal"
+                          required
+                          fullWidth
+                          name="password"
+                          label="Password"
+                          type="password"
+                          id="inputPassword"
+                          autoComplete="current-password"
+                          onChange={this.onChange.bind(this)}
+                          value={this.state.password}
+                          helperText={this.state.errMsg.validPassErr}
+                          error={this.state.errMsg.validPassErr !== undefined}
+                        />
+                        <FormControlLabel
+                          control={<Checkbox value="remember" color="primary" />}
+                          label="Remember me"
+                        />
+                        <Button
+                          type="submit"
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          className={classes.submit}
+                        >
+                          Login
+                        </Button>
+                        <Grid container>
+                          <Grid item xs>
+                            <Typography variant="body2">
+                              <Link to="/sendForget">Forgot password?</Link>
+                            </Typography>
+                          </Grid>
+                          <Grid item>
+                            <Typography variant="body2">
+                              <Link to="/Sign-up">
+                                "Don't have an account? Sign Up"
+                              </Link>
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </form>
+                    </div>
+                  </Grid>
+                  <Hidden only="xs">
+                    <Grid item sm={2}>
+                      <Box className={classes.boxes} bgcolor="white"></Box>
+                    </Grid>
+                  </Hidden>
                 </Grid>
-              </Hidden>
-            </Grid>
-          </Grid>
+              </Grid>
+            </React.Fragment>
+          }
         </div>
     )
   }

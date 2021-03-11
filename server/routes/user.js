@@ -5,17 +5,9 @@ const express = require('express');
 const route = express.Router();
 const passport = require('passport');
 
-
-// get Avatar
-
-route.post('/user/getUserAvatar', userController.Avatar);
-
 // Route to check if The user Filled all the required personal Informations
 
 route.post("/user/userInfoVerification", userController.userInfoVerification);
-
-// get signUp
-route.get('/users/signup'); // .....
 
 //  post signUp
 route.post('/users/signup', validator.validationInput, userController.signUp);
@@ -29,6 +21,10 @@ route.post('/users/sendForget', validator.validationInput, userController.sendFo
 //  post forget password
 
 route.post('/users/forget/:vkey', validator.validationInput, userController.forgetPassword);
+
+//  post edit password
+
+route.post('/users/edit/:id', validator.validationInput, userController.editPassword);
 
 // get confirm account
 
@@ -61,4 +57,4 @@ route.get('/auth/42', userController.intra);
 route.get('/auth/42/callback', passport.authenticate('42', { failureRedirect: '/error' }), userController.intraCallback);
 
 
-module.exports = route;
+module.exports = route

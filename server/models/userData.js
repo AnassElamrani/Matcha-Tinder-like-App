@@ -107,7 +107,6 @@ module.exports = class User {
   }
 
   static UserForgetPassword_(password, id) {
-    // need to pass vkey to compare with in db. after updating table vkey
     return db.execute('UPDATE users SET password = ? WHERE id = ?', [
       password,
       id,
@@ -133,6 +132,14 @@ module.exports = class User {
     ])
   }
 
+
+  static UpdateOldVkey_(vkey, vkey_) {
+    return db.execute('UPDATE users SET vkey = ? WHERE vkey = ?', [
+      vkey,
+      vkey_,
+    ])
+  }
+
   // filling profil
 
   static fillProfilUpdate(data) {
@@ -155,13 +162,16 @@ module.exports = class User {
 
   static UpdateProfilInfo(data) {
     return db.execute(
-      'UPDATE users SET userName = ?, email = ?, firstName= ?, lastName= ?, bio= ? WHERE id = ?',
+      'UPDATE users SET userName = ?, email = ?, firstName= ?, lastName= ?, bio= ?, gender = ?, type = ?, age = ? WHERE id = ?',
       [
         data.userName,
         data.email,
         data.firstName,
         data.lastName,
         data.bio,
+        data.gender,
+        data.type,
+        data.age,
         data.id,
       ]
     )
@@ -195,14 +205,4 @@ module.exports = class User {
   static UpdateStatusUser(userId) {
     return db.execute('UPDATE users SET status = 2 WHERE id = ?', [userId])
   }
-
-  static Avatar(userId)
-  {
-    return db.execute('SELECT image FROM imgProfil WHERE users_id = ? AND pointer = 0', [userId]);
-  }
-
-  // static canChatWith(userId)
-  // {
-  //   return ()
-  // }
 }
