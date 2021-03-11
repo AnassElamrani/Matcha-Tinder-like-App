@@ -97,6 +97,7 @@ const Search = (props) => {
       geo: geo,
       tag: tag1
     }).then((res) => {
+      console.log(res.data)
       if (res.data) {
         props.setList(res.data)
         props.setList1(res.data)

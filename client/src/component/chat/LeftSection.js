@@ -38,7 +38,7 @@ const StyledBadge = withStyles((theme) => ({
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
-  console.log("props", props);
+  // console.log("props", props);
   return (
     <div
       role="tabpanel"

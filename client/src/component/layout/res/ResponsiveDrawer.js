@@ -106,13 +106,54 @@ const ResponsiveDrawer = (props) => {
   const [requiredProfilInfo, setRPI] = React.useState('')
   const [didMount, setDidMount] = React.useState(false)
   const socket = React.useContext(SocketContext);
-
+  //
+  const [userInf, setUserInf] = React.useState({});
+//
 // socket connected to set active users ////////////////////////////////////////////////////////
+  // React.useEffect(() => {
+  //   if (id){
+  //     socket.emit("active", id)
+  //   }
+  // }, [socket, id])
+
   React.useEffect(() => {
-    if (id){
-      socket.emit("active", id)
+    // console.log('*effect*');
+    if(!isEmpty(userInf))
+    {
+        // console.log(8989898989898, )
+        socket.emit('join', {key: userInf.userName});
     }
-  }, [socket, id])
+}, [])
+
+  function isEmpty(obj) {
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        return false;
+      }
+    }
+
+    return JSON.stringify(obj) === JSON.stringify({});
+  }
+
+  const saveMyInfos = (value) => {
+    if (isEmpty(userInf))
+      setUserInf(value);
+  }
+  // console.log('3333333', userInf)
+  React.useEffect(() => {
+    if(id)
+    {
+
+      Axios.post('http://localhost:3001/chat/getConnectedUserInfos', { userId: id })
+      .then((res) => {
+        // if(!MyInfos)
+        if (res) {
+          saveMyInfos(res.data.myInfos);
+        }
+        
+      }).catch((err) => { console.log(err) })
+    }
+  }, [id])
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
   function success(pos) {

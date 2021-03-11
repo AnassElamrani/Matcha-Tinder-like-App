@@ -73,7 +73,7 @@ exports.getConversation = async (req, res) => {
             } else{
                 // say hello ! if the conversation is empty.
                 console.log('EmptyHadik');
-                res.json({response: 'emptyConversation'});
+                res.json({response: ''});
             }
         })
     } else {

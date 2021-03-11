@@ -25,13 +25,15 @@ const io = require('socket.io')(http, {
 io.sockets.on('connection', (socket) => {
     console.log('a user connected', socket.id)
     socket.on('join', (data) => {
-        socket.join(data.id+'Room');
+
+        socket.join(data.key);
         // client.SET(data.id, socket.id), redis.print;
-        console.log(data.id , socket.id);
+        console.log(data.key , socket.id);
     })
     socket.on('msg', (data) => {
+        console.log('010101');
         // console.log('msgto', data.to);
-        io.in(data.to+'Room').emit('new_msg', {msg: data.text});
+        io.in(data.to).emit('new_msg', {msg: data.text, from: data.from, to: data.to});
         // let socketId = '';
         // client.get(data.to, function(err, reply) {
             // reply is null when the key is missing

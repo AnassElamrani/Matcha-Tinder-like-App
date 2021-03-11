@@ -198,7 +198,7 @@ const CustomizedDialogs = (props) => {
                 </Typography>
               </Grid>
               <Grid container item xs={8} sm={4}>
-                {props.element.tag1.split(',').length > 0
+                {props.element.tag1 && props.element.tag1.split(',').length > 0
                   ? props.element.tag1.split(',').map((el, iKey) => {
                       return (
                         <div key={iKey}>
