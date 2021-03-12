@@ -5,7 +5,7 @@ import { Input, Grid } from '@material-ui/core/';
 import SocketContext from "../../start/SocketContext";
 import Axios from "axios";
 import "./ChatBox.js";
-import { keys } from "@material-ui/core/styles/createBreakpoints";
+// import { keys } from "@material-ui/core/styles/createBreakpoints";
 
 // import { io } from "socket.io-client";
 // const URL = "http://localhost:3001";
@@ -61,18 +61,21 @@ const isEmpty = (obj) => {
     } return true;
 }
 
-  
+console.log('123456879')
+
 
 const ChatBox = (props) => {
     const [conversation, setCoversation] = React.useState([]);
     const classes = useStyles();
 
     const socket = React.useContext(SocketContext);
+    
+    
     React.useEffect(() => {
         // console.log('IDIDIDIDIDI', props.id);
         if (!isEmpty(props.hisInfos)) {
             Axios.post('http://localhost:3001/chat/getConversation', { user1: props.id, user2: props.hisInfos.id })
-                .then((res) => {
+            .then((res) => {
                     if (res.data.response.length != 0) {
                         // console.log('resConv', res.data.response);
                         setCoversation(res.data.response);
@@ -84,55 +87,40 @@ const ChatBox = (props) => {
                     }
                 })
                 .catch((err) => { console.log('ErR' + err) });
+            }
+            
+        }, [props.hisInfos])
+        
+        const sendMessage = (e) => {
+            e.preventDefault();
+            if (props.hisInfos) {
+                var input = document.getElementById('msg');
+                if (e.keyCode === 13 && input.value) {
+                    saveMessage(input.value);
+                    socket.emit('msg', {text:input.value, from: props.myInfos.userName, to: props.hisInfos.userName});
+                    input.value = '';
+                    // console.log('13');
+                }
+            } else {
+                console.log('cant find hisInfos')
+            }
         }
-
-    }, [props.hisInfos])
-
-    React.useEffect(() => {
-        socket.on('new_msg', (data) => {
-            console.log('--------------------------------------')
-            // console.log('Data', data);
-        });
-    }, [])
- 
-
-    // console.log('his', props.hisInfos);
-    // socket.on('new_msg', (data) => {
-    //     console.log('data', data);
-    //     var messages = document.getElementById('messages');
-    //     var span = document.createElement('span');
-    //     span.innerHTML = data.msg+'</br>';
-    //     messages.appendChild(span);
-    // })
-
-  
-
-    const saveMessage = (content) => {
-        Axios.post('http://localhost:3001/chat/saveMessage', { from: props.id, to: props.hisInfos.id, content: content })
+        React.useEffect(() => {
+            socket.on('new_msg', (data) => {
+                alert(1)
+                console.log('--------------------------------------')
+                // console.log('Data', data);
+            });
+    
+        }, [])
+        
+        const saveMessage = (content) => {
+            Axios.post('http://localhost:3001/chat/saveMessage', { from: props.id, to: props.hisInfos.id, content: content })
             .then((res) => {
                 // console.log(res);
             }).catch((err) => { console.log(err) });
     }
 
-    const sendMessage = (e) => {
-        e.preventDefault();
-        if (props.hisInfos) {
-            var input = document.getElementById('msg');
-            if (e.keyCode === 13 && input.value) {
-                // console.log('13');
-                saveMessage(input.value);
-                input.value = '';
-                socket.emit('msg', {text:input.value, from: props.myInfos.userName, to: props.hisInfos.userName});
-                // var messages = document.getElementById('messages');
-                // var span = document.createElement('span');
-                // span.innerHTML = 'you : ' + input.value + '</br>';
-                // messages.appendChild(span);
-                // input.value = '';
-            }
-        } else {
-            console.log('cant find hisInfos')
-        }
-    }
     // console.log('len****', conversation);
     // console.log('-props', props.hisInfos)
     if (!isEmpty(props.hisInfos)) {

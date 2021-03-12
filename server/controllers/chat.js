@@ -66,8 +66,8 @@ exports.getConversation = async (req, res) => {
         await chat.getConversation(user1, user2).then((hadik) => {
             if(hadik[0].length != 0)
             {
-                console.log('hadik.length', hadik[0].length);
-                console.log('hna', hadik[0]);
+                // console.log('hadik.length', hadik[0].length);
+                // console.log('hna', hadik[0]);
                 res.json({response: hadik[0]});
                 
             } else{

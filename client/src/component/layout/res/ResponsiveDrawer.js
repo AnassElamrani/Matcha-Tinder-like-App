@@ -117,13 +117,8 @@ const ResponsiveDrawer = (props) => {
   // }, [socket, id])
 
   React.useEffect(() => {
-    // console.log('*effect*');
-    if(!isEmpty(userInf))
-    {
-        // console.log(8989898989898, )
         socket.emit('join', {key: userInf.userName});
-    }
-}, [])
+  })
 
   function isEmpty(obj) {
     for (var prop in obj) {
@@ -132,7 +127,7 @@ const ResponsiveDrawer = (props) => {
       }
     }
 
-    return JSON.stringify(obj) === JSON.stringify({});
+    return true
   }
 
   const saveMyInfos = (value) => {
