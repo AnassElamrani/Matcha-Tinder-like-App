@@ -2,6 +2,7 @@ import React from 'react'
 import Axios from 'axios'
 // import moment from 'moment'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
+import { Button } from '@material-ui/core'
 import Filter from './filter'
 import SortComponent from './sort'
 import clsx from 'clsx'
@@ -18,6 +19,8 @@ import {
   ThumbDown as ThumbDownIcon,
   SkipNext as SkipNextIcon,
 } from '@material-ui/icons'
+import SocketContext from "../../start/SocketContext";
+import PopOver from "../Notifications/PopOver";
 // import SocketContext from "../../start/SocketContext";
 
 const StyledBadge = withStyles((theme) => ({
@@ -95,13 +98,16 @@ const Browsing = (props) => {
   // const socket = React.useContext(SocketContext);
   // new Date().toLocaleString()
 
+  
+  const socket = React.useContext(SocketContext);
+  
   const getLocalisation = React.useCallback(async () => {
     await Axios.post(`/browsing/geo/${props.id}`).then((res) => {
       setGender(res.data.type)
       setCord(res.data.geo)
     })
   }, [props.id])
-
+  
   React.useEffect(() => {
     if (cord.length) {
       Axios.post(`/browsing/${props.id}`, {
@@ -118,26 +124,30 @@ const Browsing = (props) => {
     setDidMount(true);
     return () => setDidMount(false);
   }, [cord, gender, getLocalisation, props.id])
-
-  const handelLike = (event, idLiker, idLiked) => {
+  
+  const handelLike = (event, idLiker, idLiked, userNameLiker, userNameLiked) => {
     event.preventDefault()
     Axios.post(`/browsing/likes/${idLiker}`, {idLiked: idLiked}).then(res => {
       if (res.data.status) {
         const newList = list1.filter((item) => item.id !== idLiked)
         setList1(newList)
+        // like Notif
+        socket.emit('new_like', {userNameLiker : userNameLiker, userNameLiked : userNameLiked});
       }
     })
   }
+  
+  console.log('-_- ', props)
 
   const handelSkip = (event, idLiked) => {
     event.preventDefault()
     const newList = list1.filter((item) => item.id !== idLiked)
     setList1(newList)
     if (list1.length === 1)
-      getLocalisation()
+    getLocalisation()
   }
   
-
+  
   const handelDeslike = (event, idLiker, idLiked) => {
     event.preventDefault()
     Axios.post(`/browsing/deslike/${idLiker}`, {idLiked: idLiked}).then(res => {
@@ -271,7 +281,7 @@ const Browsing = (props) => {
                       <IconButton
                         aria-label='add to favorites'
                         onClick={(event) =>
-                          handelLike(event, props.id, el.id)
+                          handelLike(event, props.id, el.id, props.myInfos.userName, el.userName)
                         }
                       >
                         <Favorite style={{ color: 'green' }} />

@@ -23,20 +23,22 @@ const io = require('socket.io')(http, {
 // we have to fetch for connected user Email To create a room and join the user to it!
 
 io.sockets.on('connection', (socket) => {
-    // console.log('a user connected', socket.id)
     socket.on('join', (data) => {
 
         socket.join(data.key);
-        // client.SET(data.id, socket.id), redis.print;
         console.log(data.key , socket.id);
     })
     socket.on('msg', (data) => {
         console.log('data', data);
-        socket.in(data.to).emit('new_msg', {msg: data.text, from: data.from, to: data.to}); 
+        socket.to(data.to).emit('new_msg', {msg: data.text, from: data.from, to: data.to}); 
     })
     socket.on('disconnect', () => {
         console.log('disconnect');
     })
+    socket.on('new_like', (data) => {
+        console.log('******', data);
+        socket.to(data.userNameLiked).emit('receive_like', {who : data.userNameLiker, target: data.userNameLiker}); 
+    });
 
 })
 
@@ -75,5 +77,6 @@ app.use(browsingRoutes)
 app.use(userRoutes)
 app.use(errRoutes)
 app.use('/chat', chatRoutes);
+app.use('/notifications', chatRoutes);
 
 http.listen(3001)

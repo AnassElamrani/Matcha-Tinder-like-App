@@ -107,7 +107,7 @@ const ChatBox = (props) => {
         }
         React.useEffect(() => {
             socket.on('new_msg', (data) => {
-                alert(1)
+                // alert(1)
                 console.log('--------------------------------------')
                 // console.log('Data', data);
             });

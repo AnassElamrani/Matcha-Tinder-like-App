@@ -23,9 +23,12 @@ import {
   // LocationOn
 } from "@material-ui/icons"
 import { makeStyles, useTheme } from "@material-ui/core/styles"
-import { FaHome, FaHistory, FaHotjar, FaRegSun,FaUsers } from "react-icons/fa"
+import { FaHome, FaHistory, FaHotjar, FaRegSun, FaUsers } from "react-icons/fa"
 import { RiLogoutCircleLine } from "react-icons/ri"
 import { AiFillMessage } from 'react-icons/ai'
+// import MailIcon from '@material-ui/icons/Mail';
+// import NotificationsIcon from '@material-ui/icons/Notifications';
+import Badge from '@material-ui/core/Badge';
 import Chat from '../../chat/Chat'
 import Browsing from '../../browsing/browsing'
 import Home from "../../profil/Home"
@@ -33,7 +36,9 @@ import EditProfil from "../../profil/editProfill"
 import Setting from "../../profil/setting"
 import History from "../../history/history"
 import AllProfil from "../../allProfil/likeProfil"
+import Notifications from "./Notifications";
 import SocketContext from "../../../start/SocketContext";
+// import { set } from "date-fns"
 
 const instance = Axios.create({ withCredentials: true });
 
@@ -108,17 +113,13 @@ const ResponsiveDrawer = (props) => {
   const socket = React.useContext(SocketContext);
   //
   const [userInf, setUserInf] = React.useState({});
-//
-// socket connected to set active users ////////////////////////////////////////////////////////
-  // React.useEffect(() => {
-  //   if (id){
-  //     socket.emit("active", id)
-  //   }
-  // }, [socket, id])
+  // const [messageNumber, SetmessageNumber] = React.useState(0);
+  // const [notifNumber, SetNotifNumber] = React.useState(0);
+
 
   React.useEffect(() => {
-        socket.emit('join', {key: userInf.userName});
-  })
+    socket.emit('join', { key: userInf.userName });
+  }, [userInf, id])
 
   function isEmpty(obj) {
     for (var prop in obj) {
@@ -131,26 +132,25 @@ const ResponsiveDrawer = (props) => {
   }
 
   const saveMyInfos = (value) => {
-    if (isEmpty(userInf))
+    if (isEmpty(userInf) === true)
       setUserInf(value);
   }
-  // console.log('3333333', userInf)
+  console.log('3333333', userInf)
   React.useEffect(() => {
-    if(id)
-    {
+    if (id) {
 
       Axios.post('http://localhost:3001/chat/getConnectedUserInfos', { userId: id })
-      .then((res) => {
-        // if(!MyInfos)
-        if (res) {
-          saveMyInfos(res.data.myInfos);
-        }
-        
-      }).catch((err) => { console.log(err) })
+        .then((res) => {
+          // if(!MyInfos)
+          if (res) {
+            saveMyInfos(res.data.myInfos);
+          }
+
+        }).catch((err) => { console.log(err) })
     }
   }, [id])
 
-////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////
   function success(pos) {
     setLat(pos.coords.latitude)
     setLong(pos.coords.longitude)
@@ -163,10 +163,10 @@ const ResponsiveDrawer = (props) => {
     maximumAge: 0,
   }
 
-  let id1 = navigator.geolocation.getCurrentPosition(success, () => {}, options)
+  let id1 = navigator.geolocation.getCurrentPosition(success, () => { }, options)
 
   const func = React.useCallback(async () => {
-    if (!didMount){
+    if (!didMount) {
       const CancelToken = Axios.CancelToken
       const source = CancelToken.source()
       let { data } = await instance.get('http://localhost:3001/base', {
@@ -216,7 +216,7 @@ const ResponsiveDrawer = (props) => {
   React.useEffect(() => {
     if (lat !== false && long !== false && id)
       Axios.post(`base/localisation/${id}`, { lat: lat, long: long })
-    
+
     setDidMount(true)
     return () => {
       setDidMount(false)
@@ -345,6 +345,7 @@ const ResponsiveDrawer = (props) => {
           <Typography className={classes.ty} variant='h6' noWrap>
             Matcha
           </Typography>
+          <Notifications />
         </Toolbar>
       </AppBar>
       <nav className={classes.drawer} aria-label='mailbox folders'>
@@ -403,10 +404,10 @@ const ResponsiveDrawer = (props) => {
             component={(props) => <AllProfil id={id} />}
           />
           {requiredProfilInfo === true ? (
-            <Route exact path='/' render={(props) => <Browsing id={id} />} />
+            <Route exact path='/' render={(props) => <Browsing id={id}  myInfos={userInf} />} />
           ) : (
-            <Route exact path='/*' render={(props) => <Home id={id} />} />
-          )}
+              <Route exact path='/*' render={(props) => <Home id={id} />} />
+            )}
         </Switch>
       </main>
     </div>
