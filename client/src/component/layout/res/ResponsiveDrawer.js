@@ -345,7 +345,7 @@ const ResponsiveDrawer = (props) => {
           <Typography className={classes.ty} variant='h6' noWrap>
             Matcha
           </Typography>
-          <Notifications />
+          <Notifications myInfos={userInf} hisInfos={}/>
         </Toolbar>
       </AppBar>
       <nav className={classes.drawer} aria-label='mailbox folders'>
