@@ -3,6 +3,7 @@ const userRoutes = require("./routes/user")
 const errRoutes = require("./routes/error")
 const homeRoutes = require('./routes/base')
 const chatRoutes = require('./routes/chat');
+const notificationsRoute = Routes = require('./routes/Notifications');
 const browsingRoutes = require('./routes/browsing')
 const cookieParser = require('cookie-parser')
 const authRoutes = require("./routes/auth")
@@ -32,14 +33,14 @@ io.sockets.on('connection', (socket) => {
         console.log('data', data);
         socket.to(data.to).emit('new_msg', {msg: data.text, from: data.from, to: data.to}); 
     })
+    socket.on('new_like', (data) => {
+        console.log('******', data);
+        socket.to(data.idLiked).emit('receive_like', {who : data.idLiker, target: data.idLiker}); 
+    });
+    
     socket.on('disconnect', () => {
         console.log('disconnect');
     })
-    socket.on('new_like', (data) => {
-        console.log('******', data);
-        socket.to(data.userNameLiked).emit('receive_like', {who : data.userNameLiker, target: data.userNameLiker}); 
-    });
-
 })
 
 app.use(express.json());
@@ -77,6 +78,6 @@ app.use(browsingRoutes)
 app.use(userRoutes)
 app.use(errRoutes)
 app.use('/chat', chatRoutes);
-app.use('/notifications', chatRoutes);
+app.use('/notifications', notificationsRoute);
 
 http.listen(3001)

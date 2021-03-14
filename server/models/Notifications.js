@@ -10,7 +10,7 @@ module.exports = class Notifications {
 
     static saveNotification(who, target, type) {
         return db.execute(
-            ''
+            'INSERT INTO notifications VALUES (?, ?, ?)', [who, target, type]
         )
     }
 }

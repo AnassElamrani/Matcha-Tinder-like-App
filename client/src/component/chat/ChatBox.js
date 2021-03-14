@@ -97,7 +97,7 @@ const ChatBox = (props) => {
                 var input = document.getElementById('msg');
                 if (e.keyCode === 13 && input.value) {
                     saveMessage(input.value);
-                    socket.emit('msg', {text:input.value, from: props.myInfos.userName, to: props.hisInfos.userName});
+                    socket.emit('msg', {text:input.value, from: props.myInfos.id, to: props.hisInfos.id});
                     input.value = '';
                     // console.log('13');
                 }

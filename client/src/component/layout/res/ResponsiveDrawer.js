@@ -118,7 +118,7 @@ const ResponsiveDrawer = (props) => {
 
 
   React.useEffect(() => {
-    socket.emit('join', { key: userInf.userName });
+    socket.emit('join', { key: userInf.id });
   }, [userInf, id])
 
   function isEmpty(obj) {
@@ -345,7 +345,7 @@ const ResponsiveDrawer = (props) => {
           <Typography className={classes.ty} variant='h6' noWrap>
             Matcha
           </Typography>
-          <Notifications myInfos={userInf} hisInfos={}/>
+          <Notifications myInfos={userInf} />
         </Toolbar>
       </AppBar>
       <nav className={classes.drawer} aria-label='mailbox folders'>

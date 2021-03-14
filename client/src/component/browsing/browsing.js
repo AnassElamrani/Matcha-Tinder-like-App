@@ -125,14 +125,19 @@ const Browsing = (props) => {
     return () => setDidMount(false);
   }, [cord, gender, getLocalisation, props.id])
   
-  const handelLike = (event, idLiker, idLiked, userNameLiker, userNameLiked) => {
+  const handelLike = (event, idLiker, idLiked) => {
     event.preventDefault()
     Axios.post(`/browsing/likes/${idLiker}`, {idLiked: idLiked}).then(res => {
       if (res.data.status) {
         const newList = list1.filter((item) => item.id !== idLiked)
         setList1(newList)
+
         // like Notif
-        socket.emit('new_like', {userNameLiker : userNameLiker, userNameLiked : userNameLiked});
+        Axios.post('http://localhost:3001/notifications/saveNotifications', { who: idLiker, target: idLiked, type: "like" })
+        .then((res) => {
+            console.log('reSdasd21');
+        })
+        socket.emit('new_like', {idLiker : idLiker, idLiked : idLiked});
       }
     })
   }
@@ -281,7 +286,7 @@ const Browsing = (props) => {
                       <IconButton
                         aria-label='add to favorites'
                         onClick={(event) =>
-                          handelLike(event, props.id, el.id, props.myInfos.userName, el.userName)
+                          handelLike(event, props.id, el.id)
                         }
                       >
                         <Favorite style={{ color: 'green' }} />

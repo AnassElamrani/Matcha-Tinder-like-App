@@ -14,14 +14,14 @@ const Notifications = () => {
 
     React.useEffect(() => {
         socket.on('receive_like', (data) => {
-            snn(notifNumber);
             console.log('|-----=> ', data);
+            snn(notifNumber);
             // save it to db
-            Axios.post('http://localhost:3001/notifications/saveNotification',
-                { who: data.who, target: data.target, type: "like" })
-                .then((res) => {
-                    console.log('reSdasd21');
-                })
+            // Axios.post('http://localhost:3001/notifications/saveNotifications',
+            //     { who: data.who, target: data.target, type: "like" })
+            //     .then((res) => {
+            //         console.log('reSdasd21');
+            //     })
 
         })
     }, []);

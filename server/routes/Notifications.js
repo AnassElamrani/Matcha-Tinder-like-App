@@ -1,11 +1,11 @@
-const NotificationsController = require("../controllers/chat");
+const NotificationsController = require("../controllers/Notfications");
 
 // const {client , redis } = require('../util/redisModule');
 
 const express = require("express");
 const route = express.Router();
 
-route.post('/saveNotifiction', NotificationsController.saveNotifiction);
+route.post('/saveNotifications', NotificationsController.saveNotifications);
 
 
 module.exports = route;
