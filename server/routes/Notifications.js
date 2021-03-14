@@ -7,5 +7,7 @@ const route = express.Router();
 
 route.post('/saveNotifications', NotificationsController.saveNotifications);
 
+route.post('/getUserNotifs', NotificationsController.getUserNotifs);
+
 
 module.exports = route;

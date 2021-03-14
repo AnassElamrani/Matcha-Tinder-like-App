@@ -35,7 +35,7 @@ io.sockets.on('connection', (socket) => {
     })
     socket.on('new_like', (data) => {
         console.log('******', data);
-        socket.to(data.idLiked).emit('receive_like', {who : data.idLiker, target: data.idLiker}); 
+        socket.to(data.idLiked).emit('receive_like', {who : data.idLiker, target: data.idLiked}); 
     });
     
     socket.on('disconnect', () => {

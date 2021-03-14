@@ -36,8 +36,8 @@ import EditProfil from "../../profil/editProfill"
 import Setting from "../../profil/setting"
 import History from "../../history/history"
 import AllProfil from "../../allProfil/likeProfil"
-import Notifications from "./Notifications";
 import SocketContext from "../../../start/SocketContext";
+import Notifications from "../../Notifications/Notifications";
 // import { set } from "date-fns"
 
 const instance = Axios.create({ withCredentials: true });

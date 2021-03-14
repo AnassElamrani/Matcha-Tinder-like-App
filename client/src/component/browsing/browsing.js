@@ -20,7 +20,7 @@ import {
   SkipNext as SkipNextIcon,
 } from '@material-ui/icons'
 import SocketContext from "../../start/SocketContext";
-import PopOver from "../Notifications/PopOver";
+
 // import SocketContext from "../../start/SocketContext";
 
 const StyledBadge = withStyles((theme) => ({
@@ -135,7 +135,7 @@ const Browsing = (props) => {
         // like Notif
         Axios.post('http://localhost:3001/notifications/saveNotifications', { who: idLiker, target: idLiked, type: "like" })
         .then((res) => {
-            console.log('reSdasd21');
+            console.log('reSdasd21', res.status);
         })
         socket.emit('new_like', {idLiker : idLiker, idLiked : idLiked});
       }

@@ -53,7 +53,7 @@ const ChatList = (props) => {
       }
     }
 
-    return JSON.stringify(obj) === JSON.stringify({});
+    return true;
   }
 
   const saveMyInfos = (value) => {
