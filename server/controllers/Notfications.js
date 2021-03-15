@@ -25,13 +25,13 @@ exports.getUserNotifs = async (req, res) => {
     {
         console.log('3245734526745764552345')
         await Notif.getUserNotifs(req.body.userId)
-        .then(res => {
-            if(res)
+        .then(response => {
+            if(response)
             {
-                if(res[0])
-                    res.json({whoInfos : res[0]})
+                if(response[0])
+                    res.json({whoInfos : response[0]})
                 else {
-                    console.log('RES', res);
+                    console.log('RES', response);
                 }
             }
         }).catch((err) => console.log('Usernotif', err));
