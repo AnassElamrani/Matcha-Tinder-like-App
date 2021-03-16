@@ -121,9 +121,17 @@ const Browsing = (props) => {
         }
       })
     } else getLocalisation()
+
+    
     setDidMount(true);
     return () => setDidMount(false);
   }, [cord, gender, getLocalisation, props.id])
+  
+  // socket ///
+
+  socket.on('connection_time', (data) => {
+    console.log('AxxxA', data);
+  })
 
   const handelLike = (event, idLiker, idLiked) => {
     event.preventDefault()
@@ -163,9 +171,11 @@ const Browsing = (props) => {
         //     console.log('reSdasd21', res.status);
         //   })
         socket.emit('new_like', { who: idLiker, target: idLiked });
+        // connection time 
       }
     })
   }
+  socket.emit('get_time', {id : props.id});
 
   console.log('-_- ', props)
 
@@ -218,7 +228,8 @@ const Browsing = (props) => {
 
   if (!didMount)
     return null
-
+// console.log('list', list);
+// console.log('list1', list1);
   return (
     <div className={classes.diva}>
       <Grid
@@ -298,6 +309,7 @@ const Browsing = (props) => {
                     )} */}
                     {/* <button onClick={handelClick}>Click</button> */}
                     <CardContent>
+                    <Typography variant='h6'>;;;;:</Typography>
                       <Typography variant='h6'>Biography :</Typography>
                       <Typography
                         variant='body2'

@@ -225,9 +225,10 @@ const ResponsiveDrawer = (props) => {
   }, [id, lat, long])
 
   const handelLogout = () => {
+    instance.post('http://localhost:3001/logout')
     if(id)
       socket.emit('Firedisconnect', {id : id})
-    instance.post('http://localhost:3001/logout')
+    // socket.close();
     props.logout()
   }
 

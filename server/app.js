@@ -1,3 +1,6 @@
+var ta = require('./timeago.js')
+
+
 const bodyParser = require("body-parser")
 const userRoutes = require("./routes/user")
 const errRoutes = require("./routes/error")
@@ -21,6 +24,9 @@ const io = require('socket.io')(http, {
 }}
 );
 
+console.log('----', ta.ago(new Date()));
+
+
 // we have to fetch for connected user Email To create a room and join the user to it!
 
 io.sockets.on('connection', (socket) => {
@@ -30,12 +36,16 @@ io.sockets.on('connection', (socket) => {
         console.log(data.key , socket.id);
         if(data.key && socket.id)
         {
-            client.set(data.key, socket.id);
+            client.hmset(`user${data.key}`, {id : data.key, socketId: socket.id, connected_at: new Date()});
+            // client.set(data.key+'-'+(new Date()).getTime() / 1000, socket.id);
             client.keys('*', (err, keys) => {
                 if (err)
                     return console.log(err);
                 for(var i = 0, len = keys.length; i < len; i++){
-                    console.log('-', keys[i]);
+                    // console.log('-', keys[i]);
+                    client.hgetall(keys[i], function (err, obj) {
+                        console.dir(obj);
+                     });
                 }
             });
         }
@@ -56,23 +66,55 @@ io.sockets.on('connection', (socket) => {
 
     socket.on('new_dislike', (data) => {
         console.log('dislike', data);
-        socket.to(data.target).emit('receive_dislike', {who : data.who, target: data.target}); 
+        socket.to(data.target).emit('receive_dislike', {who : data.who, target: data.target});
+
+    socket.on('get_time', (data) => {
+        console.log('.............');
+        // var users = [];
+        // client.keys('*', (err, keys) => {
+        //     if (err)
+        //         return console.log(err);
+        //     for(var i = 0, len = keys.length; i < len; i++){
+        //         client.hgetall(keys[i], function (err, obj) {
+        //             console.dir(obj);
+        //             users.push(obj);
+        //          });
+        //     }
+        // });
+        // socket.to(data.id).emit('connection_time', { users: users});
+        });
     });
     
     socket.on('Firedisconnect', (data) => {
         if(data.id && socket.id)
         {
-            client.del(data.id);
+            client.hmset(`user${data.id}`, {disconnect_at : new Date()});
+
+            client.keys('*', (err, keys) => {
+                if (err)
+                    return console.log(err);
+                // for(var i = 0, len = keys.length; i < len; i++){
+                //     client.hmset(`user${data.id}`, {id : data.id, status : "disconnected", socketId: socket.id, time: ta.ago(new Date() - seconds)});
+                // }
+            });
+
             client.keys('*', (err, keys) => {
                 if (err)
                     return console.log(err);
                 for(var i = 0, len = keys.length; i < len; i++){
-                    console.log('-', keys[i]);
+                    client.hgetall(keys[i], function (err, obj) {
+                        console.dir(obj);
+                     });
                 }
             });
         }
-        console.log('disconnect');
+        
+        console.log('disconnect', data);
     })
+
+    
+
+
 })
 app.use(express.json());
 var corsOptions = {

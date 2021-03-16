@@ -104,6 +104,8 @@ const ChatBox = (props) => {
                     })
                 socket.emit('msg', { text: input.value, from: props.myInfos.id, to: props.hisInfos.id });
                 input.value = '';
+
+                // input.value ===> append ==> me right
                 // console.log('13');
             }
         } else {
@@ -115,7 +117,7 @@ const ChatBox = (props) => {
             // alert(1)
             
             console.log('--------------------------------------')
-            // console.log('Data', data);
+            console.log('Data', data);
         });
 
     }, [])
@@ -142,6 +144,7 @@ const ChatBox = (props) => {
                             conversation.map((element) => {
                                 if (element.id_from == props.myInfos.id) {
                                     return (
+                                        //hnaya
                                         <Grid item container className={classes.me}>
                                             <Grid item sm={4}></Grid>
                                             <Grid item sm={8} className={classes.right}>
