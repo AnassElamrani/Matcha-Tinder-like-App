@@ -162,7 +162,7 @@ const Browsing = (props) => {
         //   .then((res) => {
         //     console.log('reSdasd21', res.status);
         //   })
-        socket.emit('new_like', { idLiker: idLiker, idLiked: idLiked });
+        socket.emit('new_like', { who: idLiker, target: idLiked });
       }
     })
   }

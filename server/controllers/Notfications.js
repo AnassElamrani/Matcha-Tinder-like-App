@@ -53,7 +53,7 @@ exports.doILikeHim = async (req, res) => {
         .then((response) => {
             // console.log('response', response);
             if(response[0].length != 0)
-                res.json({answer: "yes"});
+                res.json({answer: "yes", resp: response});
             else if(response[0].length === 0)
                 res.json({answer: "no"});
         })
@@ -69,7 +69,7 @@ exports.isMatched = async (req, res) => {
         console.log('ppppp3220');
         await Notif.isMatched(req.body.myId, req.body.hisId)
         .then((response) => {
-            console.log('response', response);
+            // console.log('response', response);
             if(response[0].length != 0)
                 res.json({answer: "yes"});
             else if(response[0].length === 0)

@@ -28,6 +28,17 @@ io.sockets.on('connection', (socket) => {
 
         socket.join(data.key);
         console.log(data.key , socket.id);
+        if(data.key && socket.id)
+        {
+            client.set(data.key, socket.id);
+            client.keys('*', (err, keys) => {
+                if (err)
+                    return console.log(err);
+                for(var i = 0, len = keys.length; i < len; i++){
+                    console.log('-', keys[i]);
+                }
+            });
+        }
     })
     socket.on('msg', (data) => {
         console.log('data', data);
@@ -35,24 +46,34 @@ io.sockets.on('connection', (socket) => {
     })
     socket.on('new_like', (data) => {
         console.log('******', data);
-        socket.to(data.idLiked).emit('receive_like', {who : data.idLiker, target: data.idLiked}); 
+        socket.to(data.target).emit('receive_like', {who : data.who, target: data.target}); 
     });
 
     socket.on('new_visit', (data) => {
         console.log('visit', data);
-        socket.to(data.idVisited).emit('receive_visit', {who : data.idVisiter, target: data.idVisited}); 
+        socket.to(data.target).emit('receive_visit', {who : data.who, target: data.target}); 
     });
 
     socket.on('new_dislike', (data) => {
         console.log('dislike', data);
-        socket.to(data.idDisliked).emit('receive_dislike', {who : data.idDisliker, target: data.idDisliked}); 
+        socket.to(data.target).emit('receive_dislike', {who : data.who, target: data.target}); 
     });
     
-    socket.on('disconnect', () => {
+    socket.on('Firedisconnect', (data) => {
+        if(data.id && socket.id)
+        {
+            client.del(data.id);
+            client.keys('*', (err, keys) => {
+                if (err)
+                    return console.log(err);
+                for(var i = 0, len = keys.length; i < len; i++){
+                    console.log('-', keys[i]);
+                }
+            });
+        }
         console.log('disconnect');
     })
 })
-
 app.use(express.json());
 var corsOptions = {
     origin: 'http://localhost:3000',

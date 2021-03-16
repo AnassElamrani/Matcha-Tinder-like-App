@@ -111,7 +111,7 @@ const LikeProfil = (props) => {
               console.log('reSdasd331100', res.status);
             }).catch((err) => {console.log(err)});
           }
-          socket.emit('new_dislike', { idDisiker: user1, idDisLiked: user2 });
+          socket.emit('new_dislike', { who: user1, target: user2 });
         }).catch((Err) => { console.log('10_5.Err', Err) })
         ///   
 

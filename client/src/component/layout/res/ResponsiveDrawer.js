@@ -38,6 +38,7 @@ import History from "../../history/history"
 import AllProfil from "../../allProfil/likeProfil"
 import SocketContext from "../../../start/SocketContext";
 import Notifications from "../../Notifications/Notifications";
+import MessageNotification from "../../Notifications/MessageNotification";
 // import { set } from "date-fns"
 
 const instance = Axios.create({ withCredentials: true });
@@ -224,7 +225,8 @@ const ResponsiveDrawer = (props) => {
   }, [id, lat, long])
 
   const handelLogout = () => {
-    socket.disconnect()
+    if(id)
+      socket.emit('Firedisconnect', {id : id})
     instance.post('http://localhost:3001/logout')
     props.logout()
   }
@@ -345,6 +347,7 @@ const ResponsiveDrawer = (props) => {
           <Typography className={classes.ty} variant='h6' noWrap>
             Matcha
           </Typography>
+          <MessageNotification myInfos={userInf} />
           <Notifications myInfos={userInf} />
         </Toolbar>
       </AppBar>

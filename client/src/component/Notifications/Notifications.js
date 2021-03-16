@@ -89,15 +89,18 @@ const Notifications = (props) => {
     // React.useEffect(() => {
         socket.on('receive_like', (data) => {
             console.log('|-----=> ', data);
-            snn(notifNumber);
+            if(data.target === props.myInfos.id)
+                snn(notifNumber);
         })
         socket.on('receive_visit', (data) => {
             console.log('|---visit=> ', data);
-            snn(notifNumber);
+            if(data.target === props.myInfos.id)
+                snn(notifNumber);
         })
         socket.on('receive_dislike', (data) => {
-            console.log('|---dislike=> ', data);
-            snn(notifNumber);
+            console.log('|---dislike=> ', data.target, props.myInfos.id);
+            if(data.idDisliked === props.myInfos.id)
+                snn(notifNumber);
         })
 
     // }, []);
@@ -127,8 +130,11 @@ const Notifications = (props) => {
                     (notifications.length === 0) ? <Typography>nulllllllllll</Typography>
                      :       
                     notifications.map((el) => {
-                        return(
-                            <List className={classes.root}>
+                        if(el.type != "message")
+                        {
+
+                            return(
+                                <List className={classes.root}>
 
                         <ListItem alignItems="flex-start">
                             <ListItemAvatar>
@@ -163,6 +169,7 @@ const Notifications = (props) => {
 
                     </List>
                             )
+                        }
                             })
                         }
                         

@@ -92,12 +92,13 @@ const CustomizedDialogs = (props) => {
         setOpen(true);
         Axios.post(`/browsing/history/${visited}`, {visitor: visitor})
         // socket visit
-        console.log('ter , ted', props.visitor, props.visited);
         Axios.post('http://localhost:3001/notifications/saveNotifications', { who: props.visitor, target: props.visited, type: "visit" })
         .then((res) => {
-            console.log('reSdddd000003', res.status);
+          console.log('reSdddd000003', res.status);
         })
-        socket.emit('new_visit', {who : props.visited, target : props.visitor});
+        
+        console.log('who , target', props.visitor, props.visited);
+        socket.emit('new_visit', {who : props.visitor, target : props.visited});
     };
     const handleClose = () => {
         setOpen(false);

@@ -69,13 +69,13 @@ const ChatBox = (props) => {
     const classes = useStyles();
 
     const socket = React.useContext(SocketContext);
-    
-    
+
+
     React.useEffect(() => {
         // console.log('IDIDIDIDIDI', props.id);
         if (!isEmpty(props.hisInfos)) {
             Axios.post('http://localhost:3001/chat/getConversation', { user1: props.id, user2: props.hisInfos.id })
-            .then((res) => {
+                .then((res) => {
                     if (res.data.response.length != 0) {
                         // console.log('resConv', res.data.response);
                         setCoversation(res.data.response);
@@ -87,37 +87,45 @@ const ChatBox = (props) => {
                     }
                 })
                 .catch((err) => { console.log('ErR' + err) });
-            }
-            
-        }, [props.hisInfos])
-        
-        const sendMessage = (e) => {
-            e.preventDefault();
-            if (props.hisInfos) {
-                var input = document.getElementById('msg');
-                if (e.keyCode === 13 && input.value) {
-                    saveMessage(input.value);
-                    socket.emit('msg', {text:input.value, from: props.myInfos.id, to: props.hisInfos.id});
-                    input.value = '';
-                    // console.log('13');
-                }
-            } else {
-                console.log('cant find hisInfos')
-            }
         }
-        React.useEffect(() => {
-            socket.on('new_msg', (data) => {
-                // alert(1)
-                console.log('--------------------------------------')
-                // console.log('Data', data);
-            });
-    
-        }, [])
-        
-        const saveMessage = (content) => {
-            Axios.post('http://localhost:3001/chat/saveMessage', { from: props.id, to: props.hisInfos.id, content: content })
+
+    }, [props.hisInfos])
+
+    const sendMessage = (e) => {
+        e.preventDefault();
+        if (props.hisInfos) {
+            var input = document.getElementById('msg');
+            if (e.keyCode === 13 && input.value) {
+                saveMessage(input.value);
+                // socket msg
+                Axios.post('http://localhost:3001/notifications/saveNotifications', { who: props.id, target: props.hisInfos.id, type: "message" })
+                    .then((res) => {
+                        console.log('reSdddd000003', res.status);
+                    })
+                socket.emit('msg', { text: input.value, from: props.myInfos.id, to: props.hisInfos.id });
+                input.value = '';
+                // console.log('13');
+            }
+        } else {
+            console.log('cant find hisInfos')
+        }
+    }
+    React.useEffect(() => {
+        socket.on('new_msg', (data) => {
+            // alert(1)
+            
+            console.log('--------------------------------------')
+            // console.log('Data', data);
+        });
+
+    }, [])
+
+    const saveMessage = (content) => {
+        Axios.post('http://localhost:3001/chat/saveMessage', { from: props.id, to: props.hisInfos.id, content: content })
             .then((res) => {
                 // console.log(res);
+                // if (res.data.response === true)
+                    // socket.emit('new')
             }).catch((err) => { console.log(err) });
     }
 
