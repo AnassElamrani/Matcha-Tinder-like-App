@@ -9,13 +9,19 @@ exports.saveNotifications = async (req, res) => {
         .then((response) => {
             // console.log('1212', response);
             if(response[0].affectedRows)
-            res.json({st : true});
-            else 
-            res.json({status : false})
+            {
+                console.log('true')
+                res.json({st : true});
+            }
+            else {
+                onsole.log('false')
+                res.json({status : false})
+            }
         }).catch((err) => {
             console.log('errNotif', err);
         })
     } else {
+        console.log('false2')
         res.json({status : false})
     }
 }
@@ -36,5 +42,41 @@ exports.getUserNotifs = async (req, res) => {
             }
         }).catch((err) => console.log('Usernotif', err));
 
+    }
+}
+
+exports.doILikeHim = async (req, res) => {
+    if(req.body.myId && req.body.hisId)
+    {
+        console.log('ZzzzZZ3220');
+        await Notif.doILikeHim(req.body.myId, req.body.hisId)
+        .then((response) => {
+            // console.log('response', response);
+            if(response[0].length != 0)
+                res.json({answer: "yes"});
+            else if(response[0].length === 0)
+                res.json({answer: "no"});
+        })
+    }
+    else {
+        res.json({status:false, answer:"erro"});
+    }
+}
+
+exports.isMatched = async (req, res) => {
+    if(req.body.myId && req.body.hisId)
+    {
+        console.log('ppppp3220');
+        await Notif.isMatched(req.body.myId, req.body.hisId)
+        .then((response) => {
+            console.log('response', response);
+            if(response[0].length != 0)
+                res.json({answer: "yes"});
+            else if(response[0].length === 0)
+                res.json({answer: "no"});
+        })
+    }
+    else {
+        res.json({status:false, answer:"erro"});
     }
 }

@@ -1,0 +1,10 @@
+.MuiBadge-anchorOriginTopRightRectangle {
+    top: 5px;
+    right: 5px;
+}
+
+.MuiBadge-badge {
+    background-color: 'red';
+    height: 12px;
+    min-width: 10px;
+}

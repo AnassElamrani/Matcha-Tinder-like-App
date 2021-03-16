@@ -37,6 +37,16 @@ io.sockets.on('connection', (socket) => {
         console.log('******', data);
         socket.to(data.idLiked).emit('receive_like', {who : data.idLiker, target: data.idLiked}); 
     });
+
+    socket.on('new_visit', (data) => {
+        console.log('visit', data);
+        socket.to(data.idVisited).emit('receive_visit', {who : data.idVisiter, target: data.idVisited}); 
+    });
+
+    socket.on('new_dislike', (data) => {
+        console.log('dislike', data);
+        socket.to(data.idDisliked).emit('receive_dislike', {who : data.idDisliker, target: data.idDisliked}); 
+    });
     
     socket.on('disconnect', () => {
         console.log('disconnect');

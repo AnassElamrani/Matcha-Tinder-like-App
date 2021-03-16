@@ -12,7 +12,9 @@ import Divider from '@material-ui/core/Divider';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
-import { makeStyles } from '@material-ui/core/styles';
+import { StylesProvider } from "@material-ui/core/styles";
+import "./notifications.css";
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 
 import SocketContext from "../../start/SocketContext";
 
@@ -30,9 +32,9 @@ const useStyles = makeStyles((theme) => ({
           margin: theme.spacing(1),
         },
       },
-    bdg : {
-        // backgroundColor: 'pink'
-    }
+    // bdg : {
+    //     backgroundColor: 'pink'
+    // }
 }));
 
 const Notifications = (props) => {
@@ -78,8 +80,7 @@ const Notifications = (props) => {
     };
 
     const snn = (x) => {
-        x++;
-        SetNotifNumber(x);
+        SetNotifNumber(" ");
     }
 
     const open = Boolean(anchorEl);
@@ -90,12 +91,22 @@ const Notifications = (props) => {
             console.log('|-----=> ', data);
             snn(notifNumber);
         })
+        socket.on('receive_visit', (data) => {
+            console.log('|---visit=> ', data);
+            snn(notifNumber);
+        })
+        socket.on('receive_dislike', (data) => {
+            console.log('|---dislike=> ', data);
+            snn(notifNumber);
+        })
 
     // }, []);
     console.log('notifications', notifications)
     return (
+        <StylesProvider injectFirst>
+
         <div className={classes.Troot}>
-            <Badge className={classes.bdg} badgeContent="" aria-describedby={id} color="primary" onClick={handleClick}>
+            <Badge className={classes.bdg} badgeContent={notifNumber} aria-describedby={id} color="secondary" onClick={handleClick}>
                 <NotificationsIcon />
             </Badge>
             <Popover
@@ -124,7 +135,15 @@ const Notifications = (props) => {
                                 <Avatar alt={`${el.userName}image`} src={`http://localhost:3001/${el.image}`} />
                             </ListItemAvatar>
                             <ListItemText
-                                primary="New Like"
+                                primary={
+                                    el.type == "like" ? "New like" 
+                                    :
+                                    el.type == "visit" ? "New visit"
+                                    :
+                                    el.type == "likes back" ? "Matched"
+                                    :
+                                    el.type == "dislike" ? "Unmatched" : ''
+                                }
                                 secondary={
                                     <React.Fragment>
                                         <Typography
@@ -135,7 +154,7 @@ const Notifications = (props) => {
                                             >
                                             {el.userName}
                                         </Typography>
-                                        {`${el.type }you`}
+                                        {`${el.type }your profile`}
                                     </React.Fragment>
                                 }
                                 />
@@ -155,6 +174,7 @@ const Notifications = (props) => {
                 <NotificationsIcon />
             </Badge> */}
         </div>
+        </StylesProvider>
     )
 };
 

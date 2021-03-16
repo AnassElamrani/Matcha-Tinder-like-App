@@ -10,7 +10,7 @@ import Profil from './profil'
 import Map from "./map"
 import Search from './search'
 import {
-  Card, CardHeader, CardContent, CardActions,Badge,
+  Card, CardHeader, CardContent, CardActions, Badge,
   // Collapse,
   Avatar, IconButton, Typography, Container, Grid
 } from '@material-ui/core'
@@ -98,16 +98,16 @@ const Browsing = (props) => {
   // const socket = React.useContext(SocketContext);
   // new Date().toLocaleString()
 
-  
+
   const socket = React.useContext(SocketContext);
-  
+
   const getLocalisation = React.useCallback(async () => {
     await Axios.post(`/browsing/geo/${props.id}`).then((res) => {
       setGender(res.data.type)
       setCord(res.data.geo)
     })
   }, [props.id])
-  
+
   React.useEffect(() => {
     if (cord.length) {
       Axios.post(`/browsing/${props.id}`, {
@@ -115,33 +115,58 @@ const Browsing = (props) => {
         gender: gender,
       }).then((res) => {
         console.log(res.data)
-        if (res.data){
+        if (res.data) {
           setList(res.data)
-          setList1(res.data)  
+          setList1(res.data)
         }
       })
     } else getLocalisation()
     setDidMount(true);
     return () => setDidMount(false);
   }, [cord, gender, getLocalisation, props.id])
-  
+
   const handelLike = (event, idLiker, idLiked) => {
     event.preventDefault()
-    Axios.post(`/browsing/likes/${idLiker}`, {idLiked: idLiked}).then(res => {
+    Axios.post(`/browsing/likes/${idLiker}`, { idLiked: idLiked }).then(res => {
       if (res.data.status) {
         const newList = list1.filter((item) => item.id !== idLiked)
         setList1(newList)
 
-        // like Notif
-        Axios.post('http://localhost:3001/notifications/saveNotifications', { who: idLiker, target: idLiked, type: "like" })
-        .then((res) => {
-            console.log('reSdasd21', res.status);
-        })
-        socket.emit('new_like', {idLiker : idLiker, idLiked : idLiked});
+        // like && like back Notif
+
+        Axios.post('http://localhost:3001/notifications/doILikeHim', { myId: idLiker, hisId: idLiked })
+          .then((res) => {
+            console.log('XxxX0110', res.data.answer);
+            if (res.data.answer == "yes") {
+              Axios.post('http://localhost:3001/notifications/saveNotifications',
+                { who: idLiker, target: idLiked, type: "likes back" })
+                .then((res) => {
+                  console.log('reSdasd210000', res.status);
+                }).catch((err) => {console.log(err)});
+            }
+            else if(res.data.answer == "no")
+            {
+              console.log('XxxX77777', res.data.whoInfos);
+              Axios.post('http://localhost:3001/notifications/saveNotifications',
+                { who: idLiker, target: idLiked, type: "like" })
+                .then((res) => {
+                  console.log('reSdasd21', res.status);
+                }).catch((err) => {console.log(err)});
+            } 
+
+          }).catch((Err) => { console.log('10_1.Err', Err) })
+
+        //
+        // Axios.post('http://localhost:3001/notifications/saveNotifications',
+        //   { who: idLiker, target: idLiked, type: "like" })
+        //   .then((res) => {
+        //     console.log('reSdasd21', res.status);
+        //   })
+        socket.emit('new_like', { idLiker: idLiker, idLiked: idLiked });
       }
     })
   }
-  
+
   console.log('-_- ', props)
 
   const handelSkip = (event, idLiked) => {
@@ -149,13 +174,13 @@ const Browsing = (props) => {
     const newList = list1.filter((item) => item.id !== idLiked)
     setList1(newList)
     if (list1.length === 1)
-    getLocalisation()
+      getLocalisation()
   }
-  
-  
+
+
   const handelDeslike = (event, idLiker, idLiked) => {
-    event.preventDefault()
-    Axios.post(`/browsing/deslike/${idLiker}`, {idLiked: idLiked}).then(res => {
+    event.preventDefault() 
+    Axios.post(`/browsing/deslike/${idLiker}`, { idLiked: idLiked }).then(res => {
       if (res.data.status) {
         const newList = list1.filter((item) => item.id !== idLiked)
         setList1(newList)
@@ -181,7 +206,7 @@ const Browsing = (props) => {
   //     //   setActive(data)
   //   })
   // }
-  
+
   // React.useEffect(() => {
   //   console.log(active)
   //   if (active === props.id.toString()) {
@@ -221,7 +246,7 @@ const Browsing = (props) => {
           <Filter setList1={setList1} list={list} />
         </Grid>
         <Container className={classes.copy} component='main' fixed disableGutters>
-        {list1 &&
+          {list1 &&
             list1
               .map((el, key) => {
                 const imageProfil = el.images.split(',')
@@ -236,7 +261,7 @@ const Browsing = (props) => {
                             horizontal: 'right',
                           }}
                           variant='dot'
-                          // status={status}
+                        // status={status}
                         >
                           <Avatar
                             aria-label='recipe'
@@ -254,8 +279,8 @@ const Browsing = (props) => {
                             list={list1}
                             setlist={setList1}
                             StyledBadge={StyledBadge}
-                            // status={status}
-                            // curTime={curTime}
+                          // status={status}
+                          // curTime={curTime}
                           />
                         </IconButton>
                       }

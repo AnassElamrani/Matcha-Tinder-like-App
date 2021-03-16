@@ -17,6 +17,7 @@ import { Carousel } from 'react-responsive-carousel'
 import {  FaFemale ,FaMale  } from "react-icons/fa"
 import Rating from "react-rating"
 import Report from './report'
+import SocketContext from "../../start/SocketContext";
 
 const styles = (theme) => ({
     root: {
@@ -53,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const DialogTitle = withStyles(styles)((props) => {
+  const socket = React.useContext(SocketContext);
     const { children, classes, onClose, ...other } = props;
     return (
         <MuiDialogTitle disableTypography className={classes.root} {...other}>
@@ -80,12 +82,22 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 const CustomizedDialogs = (props) => {
+
+    const socket = React.useContext(SocketContext);
+
     const [open, setOpen] = React.useState(false);
     const classes = useStyles()
 
     const handleClickOpen = (e, visitor, visited) => {
         setOpen(true);
         Axios.post(`/browsing/history/${visited}`, {visitor: visitor})
+        // socket visit
+        console.log('ter , ted', props.visitor, props.visited);
+        Axios.post('http://localhost:3001/notifications/saveNotifications', { who: props.visitor, target: props.visited, type: "visit" })
+        .then((res) => {
+            console.log('reSdddd000003', res.status);
+        })
+        socket.emit('new_visit', {who : props.visited, target : props.visitor});
     };
     const handleClose = () => {
         setOpen(false);
