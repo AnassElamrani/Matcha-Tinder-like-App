@@ -127,11 +127,10 @@ const Browsing = (props) => {
     return () => setDidMount(false);
   }, [cord, gender, getLocalisation, props.id])
   
-  // socket ///
-
-  socket.on('connection_time', (data) => {
-    console.log('AxxxA', data);
-  })
+  React.useEffect(() => {
+    console.log('****');
+    socket.emit('get_users');
+  }, [])
 
   const handelLike = (event, idLiker, idLiked) => {
     event.preventDefault()
@@ -175,9 +174,9 @@ const Browsing = (props) => {
       }
     })
   }
-  socket.emit('get_time', {id : props.id});
+  
 
-  console.log('-_- ', props)
+  // console.log('-_- ', props)
 
   const handelSkip = (event, idLiked) => {
     event.preventDefault()

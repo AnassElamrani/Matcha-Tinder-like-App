@@ -99,7 +99,12 @@ const CustomizedDialogs = (props) => {
         
         console.log('who , target', props.visitor, props.visited);
         socket.emit('new_visit', {who : props.visitor, target : props.visited});
-    };
+        socket.on('connection_time', (data) => {
+          console.log('777', data);
+        });
+        socket.emit('get_time', { who : props.visitor, target : props.visited});
+      };
+ 
     const handleClose = () => {
         setOpen(false);
     };
