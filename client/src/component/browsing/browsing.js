@@ -127,10 +127,7 @@ const Browsing = (props) => {
     return () => setDidMount(false);
   }, [cord, gender, getLocalisation, props.id])
   
-  React.useEffect(() => {
-    console.log('****');
-    socket.emit('get_users');
-  }, [])
+ 
 
   const handelLike = (event, idLiker, idLiked) => {
     event.preventDefault()
@@ -176,7 +173,7 @@ const Browsing = (props) => {
   }
   
 
-  // console.log('-_- ', props)
+  console.log('-_- ', props)
 
   const handelSkip = (event, idLiked) => {
     event.preventDefault()
@@ -308,7 +305,6 @@ const Browsing = (props) => {
                     )} */}
                     {/* <button onClick={handelClick}>Click</button> */}
                     <CardContent>
-                    <Typography variant='h6'>;;;;:</Typography>
                       <Typography variant='h6'>Biography :</Typography>
                       <Typography
                         variant='body2'

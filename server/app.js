@@ -25,12 +25,30 @@ const io = require('socket.io')(http, {
 }
 );
 
+var i = 0;
+
 // console.log('----', ta.ago(new Date()));
 
+const isConnected = (string) => {
+    var splited = [];
+    splited = string.split(',');
+    return (splited[0] == "true") ? true : false;
+}
 
+const timeAgo = (string) => {
+    i++;
+    console.log('i', i);
+    var splited = [];
+    splited = string.split(',');
+    var lastConection = new Date(splited[1]);
+    var lConnectionSeconds = lastConection.getTime();
+    var test = new Date('Thu Mar 18 2020 00:11:16 GMT+0100 (Central European Standard Time)').getTime();
+    console.log('asdsad', test);
+    return ta.ago(lastConection);
+
+
+}
 // we have to fetch for connected user Email To create a room and join the user to it!
-var users = [];
-var Exist = 0;
 
 io.sockets.on('connection', (socket) => {
     socket.on('join', (data) => {
@@ -38,7 +56,7 @@ io.sockets.on('connection', (socket) => {
         socket.join(data.key);
         console.log(data.key, socket.id);
         if (data.key && socket.id) {
-            client.hmset(`user${data.key}`, { id: data.key, socketId: socket.id, connected_at: new Date() });
+            client.hmset(data.key, { id: data.key, socketId: socket.id, connection: 'true,' + new Date() });
             // client.set(data.key+'-'+(new Date()).getTime() / 1000, socket.id);
             client.keys('*', (err, keys) => {
                 if (err)
@@ -46,7 +64,7 @@ io.sockets.on('connection', (socket) => {
                 for (var i = 0, len = keys.length; i < len; i++) {
                     // console.log('-', keys[i]);
                     client.hgetall(keys[i], function (err, obj) {
-                        // console.log('*',obj);
+                        console.dir(obj);
                     });
                 }
             });
@@ -69,76 +87,56 @@ io.sockets.on('connection', (socket) => {
     socket.on('new_dislike', (data) => {
         console.log('dislike', data);
         socket.to(data.target).emit('receive_dislike', { who: data.who, target: data.target });
-
     });
-    socket.on('get_users', (data) => {
+
+    socket.on('check_connection', (data) => {
+
+        console.log('........zZZZZzzzZZZZz.....', data);
+
+
         client.keys('*', (err, keys) => {
             if (err)
-                return console.log(err);
+            return console.log(err);
+            // maps
+            var found = 0;
             for (var i = 0, len = keys.length; i < len; i++) {
-                client.hgetall(keys[i], function (err, obj) {
-                    // users.push(obj);
-                    users.push(obj);
-                    console.log('*', obj);
-                });
+                console.log('+++', keys[i], data.visitedId);
+                if(keys[i] == data.visitedId)
+                {
+                    found = 1;
+                    client.hgetall(keys[i], function (err, obj) {
+                        // if(keys[i] == data.visitedId)
+                        // {
+                            if(isConnected(obj.connection) == false)
+                            {
+                                var TimeAgo = timeAgo(obj.connection);
+                                console.log('~~~~', TimeAgo);
+                                io.emit('receive_connection', { visitor: data.visitorId, connection: false, timeAgo: `connected ${TimeAgo}` });
+                            }
+                            else {
+                                io.emit('receive_connection', { visitor: data.visitorId, connection: true, timeAgo: 'connected now' });
+                                console.log('ONLINE');
+                            }
+                            // }
+                        });
+                }
+            }
+            if(found == 0)
+            {
+                io.emit('receive_connection', { visitor: data.visitorId, connection: false, timeAgo: 'never been connected' });
+                                console.log('not FOUND');
             }
         });
-        // console.log('*', userHasconnection, connectionDate , disconnectionDate);
-
     });
 
-    socket.on('get_time', (data) => {
-        if (users.length != 0) {
-            users.map((el) => {
-                if (el.id == data.target) {
-                    Exist = 1;
-                    console.log('-')
-                    if (el.hasOwnProperty('disconnect_at')) {
-                        var connected_at = new Date(el.connected_at);
-                        var disconnect_at = new Date(el.disconnect_at);
-                        var diff = Math.abs(disconnect_at - connected_at);
-                        // console.log('00', connected_at , disconnect_at, diff);
-                        console.log('diff', diff);
-                        var timeago = ta.ago(Date.now() - diff);
-                        socket.emit('connection_time', { status: 'idk', time: timeago });
-                    } else {
-                        // connected
-                        socket.emit('connection_time', { status: 'connected', time: 'now' });
-                    }
-                }
-            });
-            if (Exist == 0)
-                socket.emit('connection_time', { status: 'offline', time: 'offline' });
-        }
-    })
     socket.on('Firedisconnect', (data) => {
         if (data.id && socket.id) {
-            client.hmset(`user${data.id}`, { disconnect_at: new Date() });
-
-            client.keys('*', (err, keys) => {
-                if (err)
-                    return console.log(err);
-                // for(var i = 0, len = keys.length; i < len; i++){
-                //     client.hmset(`user${data.id}`, {id : data.id, status : "disconnected", socketId: socket.id, time: ta.ago(new Date() - seconds)});
-                // }
-            });
-
-            client.keys('*', (err, keys) => {
-                if (err)
-                    return console.log(err);
-                for (var i = 0, len = keys.length; i < len; i++) {
-                    client.hgetall(keys[i], function (err, obj) {
-                        console.dir(obj);
-                    });
-                }
-            });
+            client.hmset(data.id, { connection: 'false,' + new Date() });
         }
 
         console.log('disconnect', data);
     })
 })
-
-
 app.use(express.json());
 var corsOptions = {
     origin: 'http://localhost:3000',
@@ -160,7 +158,6 @@ client.on("error", (error) => {
 // need help of package path
 const path = require('path');
 const { disconnect } = require("process");
-const timeago = require('./timeago.js')
 // static folder to thing like image ...
 app.use(express.static(path.join(__dirname, 'public/upload')));
 // console.log(express.static(path.join(__dirname, 'public'))

@@ -85,26 +85,35 @@ const CustomizedDialogs = (props) => {
 
     const socket = React.useContext(SocketContext);
 
+    
     const [open, setOpen] = React.useState(false);
+    const [connection, setConnection] = React.useState('');
     const classes = useStyles()
-
+    
     const handleClickOpen = (e, visitor, visited) => {
-        setOpen(true);
-        Axios.post(`/browsing/history/${visited}`, {visitor: visitor})
-        // socket visit
-        Axios.post('http://localhost:3001/notifications/saveNotifications', { who: props.visitor, target: props.visited, type: "visit" })
-        .then((res) => {
-          console.log('reSdddd000003', res.status);
-        })
-        
-        console.log('who , target', props.visitor, props.visited);
-        socket.emit('new_visit', {who : props.visitor, target : props.visited});
-        socket.on('connection_time', (data) => {
-          console.log('777', data);
-        });
-        socket.emit('get_time', { who : props.visitor, target : props.visited});
-      };
- 
+      setOpen(true);
+      Axios.post(`/browsing/history/${visited}`, {visitor: visitor})
+      // socket visit
+      Axios.post('http://localhost:3001/notifications/saveNotifications', { who: props.visitor, target: props.visited, type: "visit" })
+      .then((res) => {
+        console.log('reSdddd000003', res.status);
+      })
+      socket.emit('check_connection', {visitedId : props.visited, visitorId : props.visitor});
+      console.log('who , target', props.visitor, props.visited);
+      socket.emit('new_visit', {who : props.visitor, target : props.visited});
+      
+    };
+React.useEffect(() => {
+
+  socket.on('receive_connection', (data) => {
+    if(props.visitor == data.visitor)
+    {
+      console.log('//////////', data);
+      setConnection(data.timeAgo)
+    }
+  });
+}, [connection])
+  
     const handleClose = () => {
         setOpen(false);
     };
@@ -117,7 +126,9 @@ const CustomizedDialogs = (props) => {
         }
       })
     }
-
+    socket.on('connection_time', (data) => {
+        console.log('ooooooooo', data);
+    })
     return (
       <React.Fragment>
         <div
@@ -166,6 +177,7 @@ const CustomizedDialogs = (props) => {
                     : ''}
                 </Carousel>
               </Grid>
+              {connection}
               <Grid container item xs={8} sm={4}>
                 <props.StyledBadge
                   overlap='circle'
