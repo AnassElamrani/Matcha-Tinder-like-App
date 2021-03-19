@@ -171,6 +171,7 @@ class Login extends Component {
           history.push("/");
         }
       });
+      // window.location.reload();
   };
 
   CancelToken = Axios.CancelToken;
@@ -196,7 +197,7 @@ class Login extends Component {
 
   componentWillUnmount() {
     if (this.source.cancel){
-      this.source.cancel()
+      this.source.cancel("Login")
     }
   }
 

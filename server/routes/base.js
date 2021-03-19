@@ -42,7 +42,7 @@ route.post(
   "/base/profil/:id",
   validator.validationInput,
   homeController.fillProfil
-);
+)
 
 // status profil
 
@@ -53,6 +53,7 @@ route.post('/base/status/:id', homeController.changeStatus)
 route.post('/base/img/:id', homeController.multerUpload)
 
 route.post('/base/img/dnd/:id', homeController.dnd)
+route.post('/base/img/dnd1/:id', homeController.dnd1)
 
 route.post('/base/img/fetch/:id', homeController.fetchImgs)
 
@@ -83,6 +84,10 @@ route.post('/base/check/:id', homeController.checkIs)
 // check if stepper not null
 
 route.post('/base/check1/:id', homeController.checkIs1)
+
+// check localization is already set
+
+route.post("/base/checkLoc/:id", homeController.checkLocIs1);
 
 // localistation
 

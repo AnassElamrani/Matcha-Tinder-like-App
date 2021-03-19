@@ -85,8 +85,6 @@ const Search = (props) => {
   const handelDone = (e) => {
     handleClose()
   }
-  // A age gap. • A “fame rating” gap. • A location. • One or multiple interests tags.
-  // next search with a new autocomplete for tag */
 
   const kit3awad = () => {
     Axios.post(`/browsing/search/${props.id}`, {
@@ -97,7 +95,6 @@ const Search = (props) => {
       geo: geo,
       tag: tag1
     }).then((res) => {
-      console.log(res.data)
       if (res.data) {
         props.setList(res.data)
         props.setList1(res.data)
@@ -120,8 +117,6 @@ const Search = (props) => {
   const handleTag = (event, newValue) => {
     setTag1(newValue)
   }
-
-  
 
   React.useEffect(() => {
     Axios.post(`base/alltag/${props.id}`).then((res) => {

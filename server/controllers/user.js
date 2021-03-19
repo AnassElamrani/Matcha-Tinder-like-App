@@ -228,7 +228,9 @@ exports.editPassword = async (req, res, next) => {
   toSend.input = { ...res.locals.input }
   data = { ...req.body }
   data.id = req.params.id
-  if (req.body.password !== undefined && req.body.newPassword !== undefined && req.body.cnfrmPassword !== undefined) {
+  // console.log(data)
+  console.log(req.body.password)
+  if (req.body.newPassword !== undefined && req.body.cnfrmPassword !== undefined) {
     await User.getDataMatch(data.id).then(([user]) => {
       user.map((el) => (psText = el.password));
     });
@@ -344,3 +346,12 @@ exports.userInfoVerification = async (req, res) => {
     .catch(err => console.log('checkReuired..Error', err));
   }
 };
+
+exports.ckeckOauth = async (req, res) => {
+  const { id } = req.params
+  await User.CheckForOauth2(id).then(([res1]) => {
+    if (res1.length) {
+      res.json(true)
+    } else res.json(false)
+  });
+}

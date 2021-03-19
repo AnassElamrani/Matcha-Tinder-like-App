@@ -23,12 +23,9 @@ import {
   // LocationOn
 } from "@material-ui/icons"
 import { makeStyles, useTheme } from "@material-ui/core/styles"
-import { FaHome, FaHistory, FaHotjar, FaRegSun, FaUsers } from "react-icons/fa"
+import { FaHome, FaHistory, FaHotjar, FaRegSun,FaUsers } from "react-icons/fa"
 import { RiLogoutCircleLine } from "react-icons/ri"
 import { AiFillMessage } from 'react-icons/ai'
-// import MailIcon from '@material-ui/icons/Mail';
-// import NotificationsIcon from '@material-ui/icons/Notifications';
-import Badge from '@material-ui/core/Badge';
 import Chat from '../../chat/Chat'
 import Browsing from '../../browsing/browsing'
 import Home from "../../profil/Home"
@@ -39,7 +36,7 @@ import AllProfil from "../../allProfil/likeProfil"
 import SocketContext from "../../../start/SocketContext";
 import Notifications from "../../Notifications/Notifications";
 import MessageNotification from "../../Notifications/MessageNotification";
-// import { set } from "date-fns"
+import IdContext from "../../../start/IdContext"
 
 const instance = Axios.create({ withCredentials: true });
 
@@ -72,7 +69,6 @@ const useStyles = makeStyles((theme) => ({
       display: "none",
     },
   },
-  // necessary for content to be below app bar
   toolbar: theme.mixins.toolbar,
   drawerPaper: {
     width: drawerWidth,
@@ -82,24 +78,6 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(3),
   },
 }));
-
-// anass part :
-// notification
-
-///////////////////////////////// Big steps ///////////////////////////////////////////////////////////
-// un utilisateur qui ne possede pas de photo ne doit pas pouvoir liker le profil d'une auter utilisateur
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////////////////////////// try to do /////////////////////////////////////////////////////////////////
-// print images in drop so that can help to delete them
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-// implimantation active users .............................///////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-// check all route with post man //////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// tag error man ba3d .... //////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 const ResponsiveDrawer = (props) => {
   const { history, window } = props
@@ -111,11 +89,10 @@ const ResponsiveDrawer = (props) => {
   const [long, setLong] = React.useState(false)
   const [requiredProfilInfo, setRPI] = React.useState('')
   const [didMount, setDidMount] = React.useState(false)
+  const [err, setErr] = React.useState(false)
   const socket = React.useContext(SocketContext);
-  //
+
   const [userInf, setUserInf] = React.useState({});
-  // const [messageNumber, SetmessageNumber] = React.useState(0);
-  // const [notifNumber, SetNotifNumber] = React.useState(0);
 
 
   React.useEffect(() => {
@@ -150,9 +127,9 @@ const ResponsiveDrawer = (props) => {
         }).catch((err) => { console.log(err) })
     }
   }, [id])
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
   function success(pos) {
+    setErr(false)
     setLat(pos.coords.latitude)
     setLong(pos.coords.longitude)
     if (id1) navigator.geolocation.clearWatch(id1)
@@ -164,60 +141,76 @@ const ResponsiveDrawer = (props) => {
     maximumAge: 0,
   }
 
-  let id1 = navigator.geolocation.getCurrentPosition(success, () => { }, options)
+  let id1 = navigator.geolocation.getCurrentPosition(success, () => {setErr(true)}, options)
 
   const func = React.useCallback(async () => {
-    if (!didMount) {
+    if (!didMount){
       const CancelToken = Axios.CancelToken
       const source = CancelToken.source()
-      let { data } = await instance.get('http://localhost:3001/base', {
-        cancelToken: source.token,
-      })
-      setId(data.user.id)
+        let { data } = await instance.get('http://localhost:3001/base', {
+          cancelToken: source.token,
+        })
+        setId(data.user.id)
       return () => {
         if (source) source.cancel('test')
       }
     }
   }, [didMount])
 
-  React.useEffect(() => {
-    func()
+  const func1 = React.useCallback(async () => {
+    console.log(id)
     if (id !== 0) {
-      instance
-        .post('http://localhost:3001/user/userInfoVerification', { userId: id })
-        .then((res) => {
-          if (res.data.status === true) {
+      console.log("TEST")
+      await instance.post('http://localhost:3001/user/userInfoVerification', { userId: id }).then((res) => {
+        console.log(res.data)
+        if (res.data.status === true) {
             setRPI(true)
           } else setRPI(false)
+        }).catch(err => {
+          console.log(err)
         })
+        console.log("TEST222")
     }
+  },[id])
+
+  React.useEffect(() => {
+    func()
+    func1()
     setDidMount(true)
     return () => {
       setDidMount(false)
     }
-  }, [func, props, id])
+  }, [func, func1])
 
   const getLocIp = React.useCallback(() => {
     // get locallization with help of ip
-    Axios.get('https://api.ipify.org?format=json').then(async (res) => {
-      await Axios.get(`http://ip-api.com/json/${res.data.ip}`).then((res) => {
-        setLat(res.data.lat)
-        setLong(res.data.lon)
-      })
-      if (id) Axios.post(`base/localisation/${id}`, { lat: lat, long: long })
+    Axios.post(`/base/checkLoc/${id}`).then(res => {
+      if (res.data.status && err){
+        Axios.get('https://api.ipify.org?format=json').then(async (res) => {
+          await Axios.get(`http://ip-api.com/json/${res.data.ip}`).then((res) => {
+            setLat(res.data.lat)
+            setLong(res.data.lon)
+          })
+          if (id) Axios.post(`base/localisation/${id}`, { lat: lat, long: long })
+        })
+      }
     })
-  }, [id, lat, long])
+  }, [id, lat, long, err])
 
   React.useEffect(() => {
     // tal l push
-    // if (lat === false && long === false)
-    //   getLocIp()
+    if (lat === false && long === false)
+      getLocIp()
   }, [lat, long, getLocIp])
 
   React.useEffect(() => {
-    if (lat !== false && long !== false && id)
-      Axios.post(`base/localisation/${id}`, { lat: lat, long: long })
-
+    Axios.post(`/base/checkLoc/${id}`).then(res => {
+      if (res.data.status){
+        if (lat !== false && long !== false && id)
+          Axios.post(`base/localisation/${id}`, { lat: lat, long: long })
+      }
+    })
+    
     setDidMount(true)
     return () => {
       setDidMount(false)
@@ -226,11 +219,18 @@ const ResponsiveDrawer = (props) => {
 
   const handelLogout = () => {
     instance.post('http://localhost:3001/logout')
-    if(id)
+    if(id){
       socket.emit('Firedisconnect', {id : id})
+    }
     // socket.close();
-    props.logout()
   }
+  socket.on('fire', (data) => {
+    console.log('****'+data.id ,id)
+    if(data.id == id)
+    {
+      props.logout()
+    }
+  })
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -385,33 +385,35 @@ const ResponsiveDrawer = (props) => {
       <main className={classes.content}>
         <div className={classes.toolbar} />
         <Switch>
-          <Route
-            exact
-            path='/edit/:id'
-            render={(props) => <EditProfil id={id} />}
-          />
-          <Route exact path='/chat' render={(props) => <Chat id={id} />} />
-          <Route
-            exact
-            path='/browsing/:id'
-            render={(props) => <Browsing id={id} />}
-          />
-          <Route exact path='/history/:id' component={History} />
-          <Route
-            exact
-            path='/setting'
-            component={(props) => <Setting id={id} />}
-          />
-          <Route
-            exact
-            path='/allProfil'
-            component={(props) => <AllProfil id={id} />}
-          />
-          {requiredProfilInfo === true ? (
-            <Route exact path='/' render={(props) => <Browsing id={id}  myInfos={userInf} />} />
-          ) : (
+          <IdContext.Provider value={id}>
+            <Route
+              exact
+              path='/edit/:id'
+              render={(props) => <EditProfil id={id} />}
+            />
+            <Route exact path='/chat' render={(props) => <Chat id={id} />} />
+            <Route
+              exact
+              path='/browsing/:id'
+              render={(props) => <Browsing id={id} />}
+            />
+            <Route exact path='/history/:id' component={History} />
+            <Route
+              exact
+              path='/setting'
+              component={(props) => <Setting id={id} />}
+            />
+            <Route
+              exact
+              path='/allProfil'
+              component={(props) => <AllProfil id={id} />}
+            />
+            {requiredProfilInfo === true ? (
+              <Route exact path='/' render={(props) => <Browsing id={id}  myInfos={userInf} />} />
+            ) : (
               <Route exact path='/*' render={(props) => <Home id={id} />} />
             )}
+          </IdContext.Provider>
         </Switch>
       </main>
     </div>

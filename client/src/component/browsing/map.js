@@ -65,7 +65,8 @@ const Map = (props) => {
   const location = position
 
   const handleClickOpen = (e) => {
-    setOpen(true)
+    if (Object.keys(props.list).length)
+      setOpen(true)
   }
 
   const handleClose = (e) => {
@@ -76,9 +77,28 @@ const Map = (props) => {
     setOpen(false)
   }
 
-    React.useEffect(() => {
-      if (props.list[0]) setPosition([props.list[0].lat, props.list[0].long])
-    }, [props.list])
+  const funcBiriHelp = React.useCallback(() => {
+    let lat_sum = 0
+    let lon_sum = 0
+    let center_x = 0
+    let center_y = 0
+
+    props.list.map(el => {
+      return lat_sum += el.lat
+    })
+    props.list.map(el => {
+      return lon_sum += el.long
+    })
+    // lon_sum += el.long
+    center_x = lat_sum / Object.keys(props.list).length
+    center_y = lon_sum / Object.keys(props.list).length
+    setPosition([center_x, center_y])
+  },
+  [props])
+
+  React.useEffect(() => {
+    funcBiriHelp(props.list)
+  }, [props.list, funcBiriHelp])
 
 
   return (
@@ -125,7 +145,7 @@ const Map = (props) => {
             <Circle
               center={position}
               pathOptions={{ color: 'red' }}
-              radius={80000}
+              radius={150000}
             />
           </MapContainer>
         </DialogContent>

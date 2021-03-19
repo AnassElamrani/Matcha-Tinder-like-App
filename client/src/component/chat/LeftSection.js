@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import SwipeableViews from "react-swipeable-views";
-import { StylesProvider , makeStyles, useTheme, withStyles } from "@material-ui/core/styles";
+import { makeStyles, useTheme, withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import { Grid, Tabs, Tab, AppBar, Paper, List ,ListItem ,ListItemSecondaryAction ,ListItemText ,ListItemAvatar ,Checkbox ,Avatar, Badge, Hidden } from '@material-ui/core';
@@ -93,61 +93,77 @@ export default function FullWidthTabs(props) {
   };
 
   return (
-      <div className={classes.Left}>
-        <AppBar position="static" color="default">
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-            aria-label="full width tabs example"
-          >
-            <Tab label="Chats" {...a11yProps(0)} />
-            <Tab label="People(matched)" {...a11yProps(1)} />
-          </Tabs>
-        </AppBar>
-        <SwipeableViews
-          axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-          index={value}
-          onChangeIndex={handleChangeIndex}
+    <div className={classes.Left}>
+      <AppBar position="static" color="default">
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+          aria-label="full width tabs example"
         >
-          <TabPanel value={value} index={0} dir={theme.direction}>
-            Conversations.....
-          </TabPanel>
-          <TabPanel id="99909090090" value={value} index={1} dir={theme.direction}>
-            <div>
+          <Tab label="Chats" {...a11yProps(0)} />
+          {/* <Tab label="People(matched)" {...a11yProps(1)} /> */}
+        </Tabs>
+      </AppBar>
+      <SwipeableViews
+        axis={theme.direction === "rtl" ? "x-reverse" : "x"}
+        index={value}
+        onChangeIndex={handleChangeIndex}
+      >
+        {/* <TabPanel value={value} index={0} dir={theme.direction}>
+          Conversations.....
+        </TabPanel> */}
+        <TabPanel
+          id="99909090090"
+          value={value}
+          index={0}
+          dir={theme.direction}
+        >
+          <div>
+            <List id="0101010">
+              {props.people && props.people.map((item, index) => {
+                if (item){
 
-          <List id="0101010">
-            {
-              props.people.map((item, index) => {
-                const {userName, id, image} = item;
-                const labelId = `checkbox-list-secondary-label-${index}`;
+                  const { userName, id, image } = item;
+                  const labelId = `checkbox-list-secondary-label-${index}`;
                 return (
-                  <ListItem key={index} onClick={() => {props.passHisInfos({userName:userName, id:id, image:image})}}>
-                         <ListItemAvatar>
-                         <StyledBadge                      
-                          overlap="circle"
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right',
-                          }}
-                          variant="dot">
-                             <Avatar
-                                 alt={`${userName} picture`}
-                                 src={`http://localhost:3001/${image}`}
-                                 />
-                             </StyledBadge>
-                         </ListItemAvatar>
-                         <ListItemText id={labelId} primary={userName} />
-                     </ListItem>   
-                    );
-                  })
-                }
+                  <ListItem
+                    key={index}
+                    onClick={() => {
+                      props.passHisInfos({
+                        userName: userName,
+                        id: id,
+                        image: image,
+                      });
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <StyledBadge
+                        overlap="circle"
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "right",
+                        }}
+                        variant="dot"
+                      >
+                        <Avatar
+                          alt={`${userName} picture`}
+                          src={`http://localhost:3001/${image}`}
+                        />
+                      </StyledBadge>
+                    </ListItemAvatar>
+                    <ListItemText id={labelId} primary={userName} />
+                  </ListItem>
+                );
+              }
+              })
+            }
             </List>
-                </div>
-          </TabPanel>
-        </SwipeableViews>
-      </div>
+          </div>
+        </TabPanel>
+      </SwipeableViews>
+    </div>
   );
 }

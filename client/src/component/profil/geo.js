@@ -1,9 +1,10 @@
 import React from 'react'
 import Axios from 'axios'
 import { withStyles } from '@material-ui/core/styles'
-import { Button, Dialog, Typography, IconButton } from '@material-ui/core'
+import { Collapse, Button, Dialog, Typography, IconButton } from '@material-ui/core'
 import { useMapEvents, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import MuiDialogTitle from '@material-ui/core/DialogTitle'
+import { Alert } from "@material-ui/lab";
+import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import MuiDialogContent from '@material-ui/core/DialogContent'
 import MuiDialogActions from '@material-ui/core/DialogActions'
 import CloseIcon from '@material-ui/icons/Close'
@@ -55,6 +56,7 @@ const DialogActions = withStyles((theme) => ({
 
 const Geo = (props) => {
     const [open, setOpen] = React.useState(false)
+    const [open1, setOpen1] = React.useState(false)
     const [position, setPosition] = React.useState(null)
     const [city, setCity] = React.useState(null)
     const  zoom = 8
@@ -64,11 +66,12 @@ const Geo = (props) => {
     }
 
     const handleClose = (e) => {
-      setOpen(false)
+      setOpen(false);
     }
 
     const handelDone = (e, position, city) => {
-      setOpen(false)
+      setOpen1(true);
+      setOpen(false);
     }
 
 
@@ -81,35 +84,51 @@ const Geo = (props) => {
           setCity(null)
           setPosition(e.latlng)
         },
-      })
+      });
+
+      const f = React.useCallback(async () => {
+        if (position !== null) {
+          await Axios.post(`/base/updateGeo/${props.id}`, { latlng: position }).then(
+            (res) => {
+              if (res.data !== "") {
+                setCity(res.data);
+              }
+            }
+          );
+        }
+      }, [position, props]);
 
       React.useEffect(() => {
-        if (position !== null){
-          Axios.post(`/base/updateGeo/${props.id}`, {latlng: position}).then(res => {
-            if (res.data !== ""){
-              setCity(res.data)
-            }
-          })
-        }
-      }, [position, city, props.id, props])
+        f()
+      }, [f])
       return position === null ? null : (
         <Marker position={position}>
           <Popup>{city && city}</Popup>
         </Marker>
       )
     }
+     React.useEffect(() => {
+       const interval = setInterval(() => {
+         if (open1)
+           setOpen1(false);
+       }, 1500);
+       return () => clearInterval(interval);
+     });
 
     return (
       <React.Fragment>
-        <Button variant='outlined' color='primary' onClick={handleClickOpen}>
+        <Collapse in={open1}>
+          <Alert severity="success">Localization have been updated</Alert>
+        </Collapse>
+        <Button variant="outlined" color="primary" onClick={handleClickOpen}>
           Edit Your Position
         </Button>
         <Dialog
           onClose={handleClose}
-          aria-labelledby='customized-dialog-title'
+          aria-labelledby="customized-dialog-title"
           open={open}
         >
-          <DialogTitle id='customized-dialog-title' onClose={handleClose}>
+          <DialogTitle id="customized-dialog-title" onClose={handleClose}>
             Maps
           </DialogTitle>
           <DialogContent dividers>
@@ -117,20 +136,24 @@ const Geo = (props) => {
             <Typography>Choose with your mouse a position :</Typography>
             <MapContainer center={location} zoom={zoom} Icon={Icon}>
               <TileLayer
-                url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               />
-              <LocationMarker id={props.id} p={setPosition} c={setCity}/>
+              <LocationMarker id={props.id} p={setPosition} c={setCity} />
             </MapContainer>
           </DialogContent>
           <DialogActions>
-            <Button autoFocus onClick={(event) => handelDone(event, position, city)} color='primary'>
+            <Button
+              autoFocus
+              onClick={(event) => handelDone(event, position, city)}
+              color="primary"
+            >
               Done
             </Button>
           </DialogActions>
         </Dialog>
       </React.Fragment>
-    )
+    );
 }
 
 

@@ -8,7 +8,6 @@ const Error = (props) => {
     auth ? history.push("/") : history.push("/Login");
     // history.push("/");
   };
-  console.log(props)
   return (
     <React.Fragment>
       <Typography variant="h1">Page Not Found</Typography>

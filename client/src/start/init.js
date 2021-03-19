@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createMuiTheme } from "@material-ui/core/styles";
 import Axios from "axios";
 import { Route, Switch } from "react-router-dom";
 import Login from "../component/auth/Login";
@@ -7,61 +8,64 @@ import Valid from "../component/auth/Valid";
 import SendForget from "../component/forget/sendForget";
 import Forget from "../component/forget/forget";
 import ResponsiveDrawer from "../component/layout/res/ResponsiveDrawer";
-import SocketContext from './SocketContext'
-import { io } from 'socket.io-client'
-const URL = 'http://localhost:3001'
+import SocketContext from "./SocketContext";
+import { io } from "socket.io-client";
+import history from "../history/history";
+const URL = "http://localhost:3001";
 
-const socket = io(URL)
+const socket = io(URL);
 
 const Init = (props) => {
-  const [loggedin, setLoggedin] = useState(false)
-  const [lay3awn, setLay3awn] = React.useState(false)
+  const [loggedin, setLoggedin] = useState(false);
+  const [lay3awn, setLay3awn] = React.useState(false);
 
   const login = () => {
     setLoggedin(!loggedin);
   };
   const logout = () => {
-    setLoggedin(false)
-    setLay3awn(false)
+    setLoggedin(false);
+    setLay3awn(false);
+    history.push("/Sign-up");
+    // history.push("/Login");
   };
 
-  const CancelToken = Axios.CancelToken
-  const source = CancelToken.source()
+  const CancelToken = Axios.CancelToken;
+  const source = CancelToken.source();
 
   const checkLogin = React.useCallback(async () => {
     await Axios.get("http://localhost:3001/users/checkLogin", {
       withCredentials: true,
-      cancelToken: source.token
+      cancelToken: source.token,
     })
       .then((response) => {
         if (response.data.access === "Granted" && response.data.jwt)
-          setLoggedin(true)
-        else
-          setLoggedin(false);
+          setLoggedin(true);
+        else setLoggedin(false);
       })
       .catch((error) => {
         console.log(error);
       });
-  }, [source])
+  }, [source]);
 
   useEffect(() => {
-    checkLogin()
+    checkLogin();
     return () => {
-      if (source)
-        source.cancel("init")
-    }
+      if (source) source.cancel("init");
+    };
   }, [checkLogin, source]);
+  const theme = createMuiTheme({});
 
   return (
     <React.Fragment>
+      {/* <ThemeProvider theme={theme}></ThemeProvider> */}
       {loggedin === false ? (
         <Switch>
-          <Route exact path='/Sign-up' component={Signup} />
-          <Route path='/Login' component={() => <Login login={login} />} />
-          <Route path='/confirm/:cnfId' component={Valid} />
-          <Route path='/sendForget' component={SendForget} />
-          <Route path='/forget/:frgId' component={Forget} />
-          <Route path='/*' component={() => <Login login={login} />} />
+          <Route exact path="/Sign-up" component={Signup} />
+          <Route path="/Login" component={() => <Login login={login} />} />
+          <Route path="/confirm/:cnfId" component={Valid} />
+          <Route path="/sendForget" component={SendForget} />
+          <Route path="/forget/:frgId" component={Forget} />
+          <Route path="/*" component={() => <Login login={login} />} />
         </Switch>
       ) : (
         <SocketContext.Provider value={socket}>
@@ -74,7 +78,7 @@ const Init = (props) => {
         </SocketContext.Provider>
       )}
     </React.Fragment>
-  )
-}
+  );
+};
 
 export default Init;

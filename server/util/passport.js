@@ -26,15 +26,12 @@ passport.use(new GoogleStrategy({
 },
 async function(accessToken, refreshToken, profile, done) {
     profile = profile._json;
-    console.log(profile);
     await User.oauthFindUser(profile.sub).then((response) => {
         if(response[0].length === 0)
         {
             User.oauthRegister(profile.sub, profile.email, profile.name, profile.given_name, profile.family_name, '*', accessToken, 1, null, null)
-            console.log('User created Successfully !');
             
         } else {
-            console.log('Already Registred!');
         }
     }).catch((err) => { console.log('err :', err)})
     return done(null, profile);
@@ -50,15 +47,12 @@ passport.use(new FacebookStrategie({
 async function(accessToken, refreshToken, profile, done) {
     profile = profile._json;
     // console.log(profile);
-    console.log(profile.id, profile.email, profile.name, profile.first_name, profile.last_name, '*', accessToken);
     await User.oauthFindUser(profile.id).then((response) => {
         if(response[0].length === 0)
         {
             User.oauthRegister(profile.id, profile.email, profile.name, profile.first_name, profile.last_name, '*', accessToken, 1, null, null)
-            console.log('User created Successfully !');
             
         } else {
-            console.log('Already Registred!');
         }
     }).catch((err) => { console.log('err :', err)})
     // console.log(profile._json.  picture.data.url);
@@ -92,11 +86,8 @@ async function(accessToken, refreshToken, profile, done) {
        {
            //
            User.oauthRegister(profile.id, profile.email, profile.login, profile.first_name, profile.last_name, '*', accessToken, 1, null, null)
-           console.log('User created Successfully !');
-           
        } else {
            // 
-           console.log('Already Registred!');
        }
    }).catch((err) => { console.log('err :', err)})
     // console.log(profile._json.image_url);

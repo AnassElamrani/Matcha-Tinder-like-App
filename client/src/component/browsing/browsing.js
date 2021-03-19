@@ -2,7 +2,6 @@ import React from 'react'
 import Axios from 'axios'
 // import moment from 'moment'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
-import { Button } from '@material-ui/core'
 import Filter from './filter'
 import SortComponent from './sort'
 import clsx from 'clsx'
@@ -10,18 +9,17 @@ import Profil from './profil'
 import Map from "./map"
 import Search from './search'
 import {
-  Card, CardHeader, CardContent, CardActions, Badge,
-  // Collapse,
-  Avatar, IconButton, Typography, Container, Grid
+  Card, CardHeader, CardContent, CardActions,Badge, Grid,
+  Collapse, Avatar, IconButton, Typography, Container
 } from '@material-ui/core'
+import {Alert} from '@material-ui/lab';
 import {
   Favorite,
   ThumbDown as ThumbDownIcon,
   SkipNext as SkipNextIcon,
 } from '@material-ui/icons'
 import SocketContext from "../../start/SocketContext";
-
-// import SocketContext from "../../start/SocketContext";
+import IdContext from "../../start/IdContext";
 
 const StyledBadge = withStyles((theme) => ({
   // badge: (props) => 
@@ -91,43 +89,50 @@ const Browsing = (props) => {
   const classes = useStyles()
   const [list, setList] = React.useState([])
   const [list1, setList1] = React.useState([])
+  const [statusImg, setStatusImg] = React.useState(false)
+  const [open, setOpen] = React.useState(false)
   // const [status, setStatus] = React.useState("true")
   // const [curTime, setcurTime] = React.useState()
   const [didMount, setDidMount] = React.useState(false)
+  const globalId = React.useContext(IdContext)
   // const [active, setActive] = React.useState("")
-  // const socket = React.useContext(SocketContext);
+  const socket = React.useContext(SocketContext);
   // new Date().toLocaleString()
 
-
-  const socket = React.useContext(SocketContext);
-
   const getLocalisation = React.useCallback(async () => {
-    await Axios.post(`/browsing/geo/${props.id}`).then((res) => {
+    await Axios.post(`/browsing/geo/${globalId}`).then((res) => {
       setGender(res.data.type)
       setCord(res.data.geo)
     })
-  }, [props.id])
+  }, [globalId])
 
   React.useEffect(() => {
+    Axios.post(`/base/img/fetch/${globalId}`, {
+      userId: globalId,
+    }).then((res) => {
+      if (res.data.s === 0){
+        /// update status in db with 3 if khass
+        setStatusImg(true)
+      }
+      else{
+        /// update status in db with 2 if khass
+        setStatusImg(false)
+      }
+    })
     if (cord.length) {
-      Axios.post(`/browsing/${props.id}`, {
+      Axios.post(`/browsing/${globalId}`, {
         cord: cord,
         gender: gender,
       }).then((res) => {
-        console.log(res.data)
-        if (res.data) {
+        if (res.data){
           setList(res.data)
-          setList1(res.data)
+          setList1(res.data)  
         }
       })
     } else getLocalisation()
-
-    
-    setDidMount(true);
+    setDidMount(true)
     return () => setDidMount(false);
-  }, [cord, gender, getLocalisation, props.id])
-  
- 
+  }, [cord, gender, getLocalisation, globalId])
 
   const handelLike = (event, idLiker, idLiked) => {
     event.preventDefault()
@@ -140,40 +145,26 @@ const Browsing = (props) => {
 
         Axios.post('http://localhost:3001/notifications/doILikeHim', { myId: idLiker, hisId: idLiked })
           .then((res) => {
-            console.log('XxxX0110', res.data.answer);
             if (res.data.answer == "yes") {
               Axios.post('http://localhost:3001/notifications/saveNotifications',
                 { who: idLiker, target: idLiked, type: "likes back" })
                 .then((res) => {
-                  console.log('reSdasd210000', res.status);
                 }).catch((err) => {console.log(err)});
             }
             else if(res.data.answer == "no")
             {
-              console.log('XxxX77777', res.data.whoInfos);
               Axios.post('http://localhost:3001/notifications/saveNotifications',
                 { who: idLiker, target: idLiked, type: "like" })
                 .then((res) => {
-                  console.log('reSdasd21', res.status);
                 }).catch((err) => {console.log(err)});
             } 
 
           }).catch((Err) => { console.log('10_1.Err', Err) })
 
-        //
-        // Axios.post('http://localhost:3001/notifications/saveNotifications',
-        //   { who: idLiker, target: idLiked, type: "like" })
-        //   .then((res) => {
-        //     console.log('reSdasd21', res.status);
-        //   })
         socket.emit('new_like', { who: idLiker, target: idLiked });
-        // connection time 
       }
     })
   }
-  
-
-  console.log('-_- ', props)
 
   const handelSkip = (event, idLiked) => {
     event.preventDefault()
@@ -182,52 +173,42 @@ const Browsing = (props) => {
     if (list1.length === 1)
       getLocalisation()
   }
-
+  
 
   const handelDeslike = (event, idLiker, idLiked) => {
-    event.preventDefault() 
-    Axios.post(`/browsing/deslike/${idLiker}`, { idLiked: idLiked }).then(res => {
-      if (res.data.status) {
-        const newList = list1.filter((item) => item.id !== idLiked)
-        setList1(newList)
-      }
-    })
+    event.preventDefault()
+    if (statusImg)
+      setOpen(true)
+    else{
+      Axios.post(`/browsing/deslike/${idLiker}`, {idLiked: idLiked}).then(res => {
+        if (res.data.status) {
+          const newList = list1.filter((item) => item.id !== idLiked)
+          setList1(newList)
+        }
+      })
+    }
   }
 
-  // mochkiill to solve
 
-  // const handelClick = async (e) => {
-  //   console.log(e)
-  //   // if (status === 'true'){
-  //   //   setStatus('false')
-  //   //   setcurTime()
-  //   // }else{
-  //   //   setStatus('true')
-  //   //   setcurTime(new Date())
-  //   // }
-
-  //   await socket.on("getActive", (data) => {
-  //     console.log(data)
-  //     // if (data !== "")
-  //     //   setActive(data)
-  //   })
-  // }
-
-  // React.useEffect(() => {
-  //   console.log(active)
-  //   if (active === props.id.toString()) {
-  //     console.log(active)
-  //     setStatus('false')
-  //     setcurTime()
-  //   }
-  // }, [active, props])
+  React.useEffect(() => {
+    
+    const interval = setInterval(() => {
+      if (open)
+        setOpen(false)
+    }, 1500);
+    return () => clearInterval(interval);
+  })
 
   if (!didMount)
     return null
-// console.log('list', list);
-// console.log('list1', list1);
+
   return (
     <div className={classes.diva}>
+      <Collapse in={open}>
+        <Alert  severity="error">
+          Add at least one image to your profil.
+        </Alert>
+      </Collapse>
       <Grid
         container
         className={classes.container}
@@ -253,7 +234,7 @@ const Browsing = (props) => {
           <Filter setList1={setList1} list={list} />
         </Grid>
         <Container className={classes.copy} component='main' fixed disableGutters>
-          {list1 &&
+        {list1 &&
             list1
               .map((el, key) => {
                 const imageProfil = el.images.split(',')
@@ -268,7 +249,6 @@ const Browsing = (props) => {
                             horizontal: 'right',
                           }}
                           variant='dot'
-                        // status={status}
                         >
                           <Avatar
                             aria-label='recipe'
@@ -286,24 +266,14 @@ const Browsing = (props) => {
                             list={list1}
                             setlist={setList1}
                             StyledBadge={StyledBadge}
-                          // status={status}
-                          // curTime={curTime}
+                            statusImg={statusImg}
+                            setOpen={setOpen}
                           />
                         </IconButton>
                       }
                       title={el.userName}
                       subheader={el.firstName + ' ' + el.lastName}
                     />
-                    {/* {curTime && (
-                      <Typography
-                        variant='body2'
-                        display='initial'
-                        className={classes.date}
-                      >
-                        Last Seen {moment(curTime).fromNow()}
-                      </Typography>
-                    )} */}
-                    {/* <button onClick={handelClick}>Click</button> */}
                     <CardContent>
                       <Typography variant='h6'>Biography :</Typography>
                       <Typography

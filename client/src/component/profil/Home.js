@@ -6,25 +6,6 @@ import FillProfil from './fillProfil'
 import MyAddImages from './myAddImages'
 import history from '../../history/history'
 
-
-
-// const triggerInput = (index) => {
-//   // console.log(printImages.split(',').length <= index)
-//   // if (printImages.split(',').length <= index) {
-//   //   console.log("test")
-//   // }
-//   if (imageRefs.current[index]) {
-//     imageRefs.current[index].click()
-//   }
-// }
-
-
-
-{/* (printImages.split(',').length > index) || (imageRefs.current[index].id) ? <IoIosRemoveCircleOutline className={classes.addCircle} onClick={(event) => handelRemoveImg(event, index)} /> */ }
-{/* <IoMdAddCircle className={classes.addCircle} /> */}
-{/* {printImages.split(',').length <= index ? <IoMdAddCircle className={classes.addCircle} /> : <IoIosRemoveCircleOutline className={classes.addCircle} onClick={(event) => handelRemoveImg(event, index)} />} */ }
-
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%"
@@ -45,9 +26,7 @@ function getSteps() {
 function getStepContent(step, props, checkTI, checkNo) {
   switch (step) {
     case 0:
-      return (
-        <MyAddImages id={props.id} checkTotalImg={checkTI} />
-      )
+      return <MyAddImages id={props.id} checkTotalImg={checkTI} stop={false} />
     case 1:
       return (
         <FillProfil id={props.id} checkTotalImg={checkTI} checkFill={checkNo} />
@@ -77,7 +56,7 @@ const HorizontalLinearStepper = (props) => {
 
   const handleDone = (e, id) => {
     Axios.post(`/base/status/${id}`)
-    history.push(`/edit/${id}`)
+    history.push(`/browsing/${id}`)
   }
 
   const checkTotalImg = () => {
@@ -96,7 +75,6 @@ const HorizontalLinearStepper = (props) => {
     if (activeStep === 0 && props.id) {
       // IF YOU WANT TO DELETE IMAGES OF USERS IN FIRST EVENT
       // Axios.post(`/base/onlyImg/${props.id}`)
-      
     }
   }, [activeStep, props])
 
@@ -108,6 +86,7 @@ const HorizontalLinearStepper = (props) => {
   // check if data is already filled
 
   const funProgress = React.useCallback(async () => {
+    console.log("ha ana");
     if (props.id){
       await Axios.post(`/base/check1/${props.id}`)
       setprogress(true)

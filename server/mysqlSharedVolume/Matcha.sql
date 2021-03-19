@@ -37,3 +37,19 @@ CREATE EVENT myevent
     ON SCHEDULE EVERY 1 SECOND
     DO
       CALL delete_like();
+
+
+   DELIMITER //
+    create procedure Update_duplicated_userName()
+    BEGIN
+    	UPDATE users SET `userName` = concat(`userName`,'0')
+        WHERE `oauth_id` IS NOT NULL AND users.`userName` in (SELECT * FROM (SELECT `userName` FROM users GROUP BY `userName` HAVING COUNT(`userName`) > 1) as a);
+    END //
+
+    CREATE EVENT myevent1
+    ON SCHEDULE EVERY 1 SECOND
+    DO
+      CALL Update_duplicated_userName();
+
+
+    --   SELECT t2.users_id, t1.name from tag t1 INNER JOIN tag_user t2 on t1.id = t2.tag_id INNER JOIN users u1 on u1.id = t2.users_id WHERE t2.users_id = u1.id

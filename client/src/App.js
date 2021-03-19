@@ -3,7 +3,6 @@ import './App.css';
 import Init from './start/init'
 
 class App extends Component {
-
   render() {
     return (
       <React.Fragment>

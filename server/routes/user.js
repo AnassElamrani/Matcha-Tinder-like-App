@@ -56,5 +56,9 @@ route.get('/auth/42', userController.intra);
 
 route.get('/auth/42/callback', passport.authenticate('42', { failureRedirect: '/error' }), userController.intraCallback);
 
+// check for oauth2
+
+route.post("/users/outh/:id", userController.ckeckOauth)
+
 
 module.exports = route

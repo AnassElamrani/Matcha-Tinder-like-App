@@ -51,6 +51,9 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.shortest,
     }),
   },
+  grid: {
+    margin: theme.spacing(1),
+  }
 }))
 
 const DialogTitle = withStyles(styles)((props) => {
@@ -82,14 +85,11 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 const CustomizedDialogs = (props) => {
-
-    const socket = React.useContext(SocketContext);
-
-    
+  const socket = React.useContext(SocketContext);
     const [open, setOpen] = React.useState(false);
     const [connection, setConnection] = React.useState('');
     const classes = useStyles()
-    
+
     const handleClickOpen = (e, visitor, visited) => {
       setOpen(true);
       Axios.post(`/browsing/history/${visited}`, {visitor: visitor})
@@ -103,32 +103,33 @@ const CustomizedDialogs = (props) => {
       socket.emit('new_visit', {who : props.visitor, target : props.visited});
       
     };
-React.useEffect(() => {
+    React.useEffect(() => {
 
-  socket.on('receive_connection', (data) => {
-    if(props.visitor == data.visitor)
-    {
-      console.log('//////////', data);
-      setConnection(data.timeAgo)
-    }
-  });
-}, [connection])
-  
+      socket.on('receive_connection', (data) => {
+        if(props.visitor == data.visitor)
+        {
+          console.log('//////////', data);
+          setConnection(data.timeAgo)
+        }
+      });
+    }, [connection])
     const handleClose = () => {
         setOpen(false);
     };
 
     const handelBlock = (e) => {
-      Axios.post(`/block/${props.visitor}`, {blocked: props.visited}).then(res => {
-        if (res.data.status){
-          const newList = props.list.filter((item) => item.id !== props.visited)
-          props.setlist(newList)
-        }
-      })
+      if (props.statusImg)
+        props.setOpen(true)
+      else{
+        Axios.post(`/block/${props.visitor}`, {blocked: props.visited}).then(res => {
+          if (res.data.status){
+            const newList = props.list.filter((item) => item.id !== props.visited)
+            props.setlist(newList)
+          }
+        })
+      }
     }
-    socket.on('connection_time', (data) => {
-        console.log('ooooooooo', data);
-    })
+
     return (
       <React.Fragment>
         <div
@@ -228,6 +229,25 @@ React.useEffect(() => {
                 </Typography>
               </Grid>
               <Grid container item xs={8} sm={4}>
+                {props.element.tag2 && props.element.tag2.split(',').length > 0
+                  ? props.element.tag2.split(',').map((el, iKey) => {
+                      return (
+                        <div key={iKey}>
+                          <Chip
+                            color='primary'
+                            variant='outlined'
+                            size='small'
+                            label={el}
+                          />
+                        </div>
+                      )
+                    })
+                  : ''}
+                <Grid container className={classes.grid}>
+                  <Typography>
+                    tag in common :
+                  </Typography>
+                </Grid>
                 {props.element.tag1 && props.element.tag1.split(',').length > 0
                   ? props.element.tag1.split(',').map((el, iKey) => {
                       return (
@@ -241,7 +261,9 @@ React.useEffect(() => {
                         </div>
                       )
                     })
-                  : ''}
+                    :  <Typography color='secondary' variant='caption'>
+                        {'Nothing to in common'}
+                      </Typography>}
               </Grid>
               <Grid item xs={8} sm={4}>
                 <Typography color='primary' variant='caption'>
@@ -366,7 +388,7 @@ React.useEffect(() => {
                 >
                   <BlockIcon />
                 </IconButton>
-                <Report visitor={props.visitor} visited={props.visited} />
+                <Report visitor={props.visitor} visited={props.visited} statusImg={props.statusImg} setOpen={props.setOpen} />
               </Grid>
             </Grid>
           </DialogContent>

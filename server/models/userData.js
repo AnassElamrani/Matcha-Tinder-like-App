@@ -50,12 +50,13 @@ module.exports = class User {
     lastName,
     password,
     vkey,
+    verify,
     gender,
     bio
   ) {
     return db.execute(
-      'INSERT INTO users(oauth_id, email, userName, firstName, lastName, password, vkey, gender, bio) VALUES (?, ? ,?, ?, ? ,? ,?, ?, ?)',
-      [oauth, email, userName, firstName, lastName, password, vkey, gender, bio]
+      'INSERT INTO users(oauth_id, email, userName, firstName, lastName, password, vkey, verify, gender, bio) VALUES (?, ? ,?, ?, ? ,? ,?, ?, ?, ?)',
+      [oauth, email, userName, firstName, lastName, password, vkey, verify, gender, bio]
     )
   }
   static oauthFindUser(oauth_id) {
@@ -91,7 +92,7 @@ module.exports = class User {
       user,
     ])
   }
-
+  
   static UserEmailModel(email) {
     return db.execute('SELECT * FROM users WHERE users.email = ? limit 1', [
       email,
@@ -144,13 +145,9 @@ module.exports = class User {
 
   static fillProfilUpdate(data) {
     return db.execute(
-      'UPDATE users SET age = ?, gender = ?, type = ?, bio = ?, fameRating = fameRating + 100 WHERE id = ?',
+      'UPDATE users SET age = ?, gender = ?, type = ?, bio = ?, status = 2, fameRating = fameRating + 100 WHERE id = ?',
       [data.age, data.gender, data.type, data.bio, data.id]
     )
-  }
-
-  static delete(id) {
-    return db.execute('DELETE FROM products WHERE products.id = ?', [id])
   }
 
   static UpdateFirstInfo(data) {
@@ -161,11 +158,11 @@ module.exports = class User {
   }
 
   static UpdateProfilInfo(data) {
+    let email = data.email === undefined ? 'email' : `'${data.email}'`;
     return db.execute(
-      'UPDATE users SET userName = ?, email = ?, firstName= ?, lastName= ?, bio= ?, gender = ?, type = ?, age = ? WHERE id = ?',
+      `UPDATE users SET userName = ?, email = ${email}, firstName= ?, lastName= ?, bio= ?, gender = ?, type = ?, age = ? WHERE id = ?`,
       [
         data.userName,
-        data.email,
         data.firstName,
         data.lastName,
         data.bio,
@@ -190,19 +187,26 @@ module.exports = class User {
 
   static DeleteProfilInfo(id) {
     return db.execute(
-      'UPDATE users SET age = null, gender = null, type = null, bio = null, fameRating = fameRating - 100 WHERE id = ?',
+      'UPDATE users SET age = null, gender = null, type = null, bio = null, fameRating = 1 WHERE id = ?',
       [id]
     )
   }
 
   static CheckRequiredUserInfo(userId) {
     return db.execute(
-      'SELECT users.bio ,users.gender, users.type, imgProfil.users_id AS ImgUserId, tag_user.tag_id FROM users INNER JOIN imgProfil ON users.id = imgProfil.users_id INNER JOIN tag_user ON users.id = tag_user.users_id WHERE users.id = ?',
-      [userId]
+      'SELECT * FROM users WHERE users.id = ? AND status = 2', [userId]
+      // 'SELECT users.bio ,users.gender, users.type, imgProfil.users_id AS ImgUserId, tag_user.tag_id FROM users INNER JOIN imgProfil ON users.id = imgProfil.users_id INNER JOIN tag_user ON users.id = tag_user.users_id WHERE users.id = ?',
+      // [userId]
     )
   }
   
   static UpdateStatusUser(userId) {
     return db.execute('UPDATE users SET status = 2 WHERE id = ?', [userId])
   }
+
+
+  static CheckForOauth2(userId) {
+    return db.execute('SELECT * from users WHERE `oauth_id` IS NOT NULL AND id = ? AND `password` = "*"', [userId])
+  }
+  
 }

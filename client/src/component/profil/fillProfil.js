@@ -1,56 +1,46 @@
 import React from "react";
 import Axios from "axios";
 import {
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText,
-  Chip,
-  Paper,
-  Collapse,
-  Button,
-  Grid,
-  TextField,
-  Typography,
-  Container,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
-  FormLabel,
-} from "@material-ui/core";
+  InputLabel, Select, MenuItem, FormHelperText, Chip, Paper, Collapse, Button, Grid,
+  TextField, Typography, Container, Radio, RadioGroup, FormControlLabel, FormControl,
+  FormLabel, GridList, GridListTile
+} from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import Size from "../helpers/size";
 
 const useStyles = makeStyles((theme) => ({
   copy: {
     marginBottom: theme.spacing(8),
-    textAlign: "center",
+    textAlign: 'center',
   },
   typo: {
     margin: theme.spacing(7),
   },
   paper: {
-    marginTop: theme.spacing(6),
-    display: "flex",
-    flexDirection: "column",
+    marginTop: theme.spacing(9),
+    display: 'flex',
+    flexDirection: 'column',
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
-    color: "green",
+    color: 'green',
   },
   root: {
-    display: "flex",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    listStyle: "none",
+    display: 'flex',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    listStyle: 'none',
     padding: theme.spacing(0.5),
     margin: 0,
   },
-  chip: {
-    margin: theme.spacing(0.5),
+  root1: {
+    textDecoration: 'none'
   },
-}));
+  gridList: {
+    width: 200,
+    height: 150,
+  },
+}))
 
 const FillProfil = (props) => {
   const initialValue = [{ validBio: undefined }];
@@ -128,7 +118,7 @@ const FillProfil = (props) => {
       setErrTag("");
       setDsbl(false);
     }
-  };
+  }
 
   const addToOption = (tag) => {
     if (errTag === "") {
@@ -138,13 +128,7 @@ const FillProfil = (props) => {
         : (id = chipData.slice(-1)[0].key + 1);
       chipData.push({ key: id, name: tag });
     }
-  };
-
-  // const handleDelete = (chipToDelete) => () => {
-  //   setChipData((chips) =>
-  //     chips.filter((chip) => chip.key !== chipToDelete.key)
-  //   );
-  // };
+  }
 
   const handleDelete = (chipToDelete) => () => {
     setChipData((chips) => chips.filter((chip) => chip.key !== chipToDelete.key))
@@ -157,13 +141,13 @@ const FillProfil = (props) => {
 
   return (
     <Size>
-      <Container className={classes.copy} component="main" maxWidth="xs">
-        <Typography className={classes.typo} component="h1" variant="h5">
+      <Container className={classes.copy} component='main' maxWidth='xs'>
+        <Typography className={classes.typo} component='h1' variant='h5'>
           Fill profil
         </Typography>
         <div className={classes.paper}>
           <form
-            method="POST"
+            method='POST'
             onSubmit={(event) =>
               fill(event, props.id, props.checkTotalImg, props.checkFill)
             }
@@ -171,87 +155,36 @@ const FillProfil = (props) => {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Biography"
+                  label='Biography'
                   multiline
                   rows={3}
-                  variant="outlined"
+                  variant='outlined'
                   value={biography}
                   onChange={(e) => setBio(e.target.value)}
                   helperText={errMsg.validBio}
                   error={errMsg.validBio !== undefined}
+                  inputProps={{ maxLength: 100 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                {/* <Collapse in={open}>
-                  <TextField
-                    label="Add New Tag"
-                    multiline
-                    variant="outlined"
-                    value={tag}
-                    onChange={(e) => handelTag(e)}
-                    helperText={errTag}
-                    error={errTag !== ""}
-                  />
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    onClick={() => {
-                      setOpen(false);
-                      setOpen1(true);
-                      addToOption(tag);
-                    }}
-                    disabled={dsbl}
-                  >
-                    Add
-                  </Button>
-                </Collapse>
-                <Collapse in={open1}>
-                  <Button
-                    disabled={open}
-                    variant="outlined"
-                    color="secondary"
-                    onClick={() => {
-                      setOpen(true);
-                      setOpen1(false);
-                    }}
-                  >
-                    New Tag
-                  </Button>
-                </Collapse>
-                <Paper component="ul" className={classes.root}>
-                  {chipData &&
-                    chipData.map((data) => {
-                      return (
-                        <li key={data.key}>
-                          <Chip
-                            label={data.name}
-                            onDelete={handleDelete(data)}
-                            className={classes.chip}
-                          />
-                        </li>
-                      );
-                    })}
-                  <Typography color="secondary">
-                    {chipData && errMsg.validTag}
-                  </Typography>
-                </Paper> */}
                 <Collapse in={open}>
                   <TextField
-                    label="Add New Tag"
+                    label='Add New Tag'
                     multiline
-                    variant="outlined"
+                    variant='outlined'
                     value={tag}
                     onChange={(e) => handelTag(e)}
                     helperText={errTag}
-                    error={errTag !== ""}
+                    error={errTag !== ''}
+                    inputProps={{maxLength: 15 }}
                   />
                   <Button
-                    variant="outlined"
-                    color="secondary"
+                    variant='outlined'
+                    color='secondary'
                     onClick={() => {
-                      setOpen(false);
-                      setOpen1(true);
-                      addToOption(tag);
+                      setOpen(false)
+                      setOpen1(true)
+                      addToOption(tag)
                     }}
                     disabled={dsbl}
                   >
@@ -261,30 +194,40 @@ const FillProfil = (props) => {
                 <Collapse in={open1}>
                   <Button
                     disabled={open}
-                    variant="outlined"
-                    color="secondary"
+                    variant='outlined'
+                    color='secondary'
                     onClick={() => {
-                      setOpen(true);
-                      setOpen1(false);
+                      setOpen(true)
+                      setOpen1(false)
                     }}
                   >
                     New Tag
                   </Button>
                 </Collapse>
-                <Paper component="ul" className={classes.root1}>
-                  {chipData &&
-                    chipData.map((data) => {
-                      return (
-                        <li key={data.key}>
-                          <Chip
-                            label={data.name}
-                            onDelete={handleDelete(data)}
-                            className={classes.chip}
-                          />
-                        </li>
-                      );
-                    })}
-                  <Typography color="secondary">
+                <Paper
+                  component='li'
+                  className={classes.root}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <GridList
+                    cellHeight={32}
+                    className={classes.gridList}
+                    cols={1}
+                  >
+                    {chipData &&
+                      chipData.map((data) => {
+                        return (
+                          <GridListTile key={data.key}>
+                            <Chip
+                              label={data.name}
+                              onDelete={handleDelete(data)}
+                              className={classes.chip}
+                            />
+                          </GridListTile>
+                        )
+                      })}
+                  </GridList>
+                  <Typography color='secondary'>
                     {chipData && errMsg.validTag}
                   </Typography>
                 </Paper>
@@ -294,17 +237,17 @@ const FillProfil = (props) => {
                   className={classes.formControl}
                   error={errMsg.validAge !== undefined}
                 >
-                  <InputLabel id="demo-simple-select-required-label">
+                  <InputLabel id='demo-simple-select-required-label'>
                     Age
                   </InputLabel>
                   <Select
-                    labelId="demo-simple-select-required-label"
-                    id="demo-simple-select-required"
+                    labelId='demo-simple-select-required-label'
+                    id='demo-simple-select-required'
                     value={age1}
                     onChange={handleChange}
                     className={classes.selectEmpty}
                   >
-                    <MenuItem value="">
+                    <MenuItem value=''>
                       <em>None</em>
                     </MenuItem>
                     {age.map((el, key) => {
@@ -312,77 +255,83 @@ const FillProfil = (props) => {
                         <MenuItem key={key} value={el}>
                           {el}
                         </MenuItem>
-                      );
+                      )
                     })}
                   </Select>
                   <FormHelperText>{errMsg.validAge}</FormHelperText>
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <FormControl component="fieldset">
-                  <FormLabel component="legend">Gender</FormLabel>
+                <FormControl component='fieldset'>
+                  <FormLabel component='legend'>Gender</FormLabel>
                   <RadioGroup
                     row
-                    aria-label="gender"
-                    name="gender1"
+                    aria-label='gender'
+                    name='gender1'
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                   >
                     <FormControlLabel
-                      value="women"
+                      value='women'
                       control={<Radio />}
-                      label="Women"
+                      label='Women'
                     />
                     <FormControlLabel
-                      value="male"
+                      value='male'
                       control={<Radio />}
-                      label="Male"
+                      label='Male'
                     />
                     <FormControlLabel
-                      value="other"
+                      value='other'
                       control={<Radio />}
-                      label="Other"
+                      label='Other'
                     />
                   </RadioGroup>
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <FormControl component="fieldset">
-                  <FormLabel component="legend">Sexual preferences</FormLabel>
+                <FormControl component='fieldset'>
+                  <FormLabel component='legend'>Sexual preferences</FormLabel>
                   <RadioGroup
                     row
-                    aria-label="type"
-                    name="type1"
+                    aria-label='type'
+                    name='type1'
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   >
                     <FormControlLabel
-                      value="women"
+                      value='women'
                       control={<Radio />}
-                      label="Women"
+                      label='Women'
                     />
                     <FormControlLabel
-                      value="male"
+                      value='male'
                       control={<Radio />}
-                      label="Male"
+                      label='Male'
                     />
                     <FormControlLabel
-                      value="other"
+                      value='other'
                       control={<Radio />}
-                      label="Other"
+                      label='Other'
                     />
                   </RadioGroup>
                 </FormControl>
               </Grid>
             </Grid>
-            <Button type="submit" variant="outlined" className={classes.submit}>
-              DONE
-            </Button>
+            <Collapse in={!active}>
+              <Button
+                type='submit'
+                variant='outlined'
+                className={classes.submit}
+              >
+                DONE
+              </Button>
+            </Collapse>
           </form>
         </div>
       </Container>
     </Size>
-  );
+  )
 };
 
 export default FillProfil;

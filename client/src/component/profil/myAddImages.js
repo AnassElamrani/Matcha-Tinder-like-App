@@ -2,12 +2,14 @@ import React from 'react'
 import Axios from 'axios'
 import Size from '../helpers/size'
 import { Grid, Card, CardMedia } from '@material-ui/core'
-import { Button, Dialog, DialogActions, DialogTitle } from '@material-ui/core';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { Button, Dialog, DialogActions, DialogTitle, Collapse } from '@material-ui/core';
+import {Alert} from '@material-ui/lab'
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { makeStyles } from '@material-ui/core/styles'
-import { IoMdAddCircle, IoIosRemoveCircleOutline } from 'react-icons/io'
+import { IoMdAddCircle } from 'react-icons/io'
 import { useEffect } from 'react'
-import AlertDialoge from './alertDialog'
+// import AlertDialoge from './alertDialog'
+import IdContext from "../../start/IdContext"
 
 const intialItems = [
   {
@@ -86,6 +88,12 @@ const MyAddImages = (props) => {
   const [printImages, setprintImages] = React.useState([])
   const [open, setOpen] = React.useState(false);
   const [keyIndex, setKeyIndex] = React.useState()
+  const [didMount, setDidMount] = React.useState(false)
+  const [errors, setErrors] = React.useState("");
+  const [msg, setNewMsg] = React.useState("");
+  const [open1, setOpen1] = React.useState(false);
+  const [statusTrue, setStatusTrue] = React.useState(false);
+  const globalId = React.useContext(IdContext)
 
   const handleClickOpen = (index) => {
     setKeyIndex(index)
@@ -93,7 +101,7 @@ const MyAddImages = (props) => {
   }
 
   const handleClose = () => {
-    setOpen(false);
+    setOpen(false)
   }
 
   imageRefs.current = []
@@ -107,34 +115,33 @@ const MyAddImages = (props) => {
   // display images inside dragar
 
   React.useEffect(() => {
-      Axios.post(`/base/displayIndrager/${props.id}`).then((res) => {
-        if (!printImages.length && res.data.images[0] !== null)
-          setprintImages(res.data.images[0].split(','))
-      })
-  }, [props, printImages])
-
+    Axios.post(`/base/displayIndrager/${globalId}`).then((res) => {
+      if (!printImages.length && res.data.images[0] !== null){
+        setprintImages(res.data.images[0].split(','))
+      }
+    })
+  }, [globalId, printImages])
   
-
   React.useEffect(() => {
     if (printImages !== ""){
-      printImages.map((el, iKey) => {
-        let srcImg = `http://localhost:3001/${el}`
-        if (iKey === 0) {
-          SetProfileImg(srcImg)
-        }
-        triggerEffect(!effect)
-        if (srcImg != null) {
-          var tmp = Items
-          tmp[iKey].value = srcImg
-          UpdateItems(tmp)
-          const gridId = imageRefs.current[iKey].id + 'img'
-          const grid = document.getElementById(gridId)
-          grid.style.background = 'url(' + srcImg + ')'
-          grid.style.backgroundSize = '200px 300px'
-        }
+        var tmp = Items
+        printImages.map((el, iKey) => {
+          let srcImg = `http://localhost:3001/${el}`
+          if (iKey === 0) {
+            SetProfileImg(srcImg)
+          }
+          if (srcImg != null) {
+            tmp[iKey].value = srcImg
+            UpdateItems(tmp)
+            const gridId = imageRefs.current[iKey].id + 'img'
+            const grid = document.getElementById(gridId)
+            grid.style.background = 'url(' + srcImg + ')'
+            grid.style.backgroundSize = '200px 300px'
+          }
+          return '';
       })
     }
-  }, [printImages])
+  }, [Items, printImages])
 
   // display of images
 
@@ -148,27 +155,31 @@ const MyAddImages = (props) => {
 
   useEffect(() => {
     displayProfileImg()
-  }, [displayProfileImg])
+    // haya erreur dial zab 
+    Axios.post(`base/img/dnd1/${globalId}`) // index stuff
+  }, [displayProfileImg, globalId])
 
   //////////////////////////
 
   // count of images
 
   const fetchImgs = React.useCallback(async () => {
-    let s = await Axios.post(`/base/img/fetch/${props.id}`, {
-      userId: props.id,
+    let s = await Axios.post(`/base/img/fetch/${globalId}`, {
+      userId: globalId,
     }).then((res) => {
       if (res.data.s === 1) return true
       else return false
     })
     return s
-  }, [props])
+  }, [globalId])
 
   useEffect(() => {
-    fetchImgs().then((res) => {
-      if (res) props.checkTotalImg()
-    })
-    if (ProfileImg) props.checkTotalImg()
+    // fetchImgs().then((res) => {
+    //   if (res && !props.stop) {console.log("1");props.checkTotalImg()}
+    // })
+    if (ProfileImg && !props.stop) {props.checkTotalImg()}
+    setDidMount(true)
+    return () => setDidMount(false)
   }, [fetchImgs, props, ProfileImg])
 
   ////////////////////////////
@@ -185,37 +196,57 @@ const MyAddImages = (props) => {
   }
 
   const handleChange = async (event, id, index) => {
+    const allowedExtensions = ["jpg", "png", "jpeg", "gif"],
+      sizeLimit = 5000000; // 1 megabyte
     if (event.target.files[0]) {
-      var value = URL.createObjectURL(event.target.files[0])
-      if (index === 0) {
-        SetProfileImg(value)
-      }
-      triggerEffect(!effect)
-      if (value != null) {
-        var tmp = Items
-        tmp[index].value = value
-        UpdateItems(tmp)
-        const gridId = imageRefs.current[index].id + 'img'
-        const grid = document.getElementById(gridId)
-        grid.style.background = 'url(' + value + ')'
-        grid.style.backgroundSize = '200px 300px'
+      const fileExtension = event.target.files[0].name.split(".").pop();
+      const fileSize = event.target.files[0].fileSize
+      console.log(fileExtension);
+      if (allowedExtensions.includes(fileExtension) || fileSize < sizeLimit) {
+        var value = URL.createObjectURL(event.target.files[0]);
+        if (index === 0) {
+          SetProfileImg(value);
+        }
+        triggerEffect(!effect);
+        if (value != null) {
+          var tmp = Items;
+          tmp[index].value = value;
+          UpdateItems(tmp);
+          const gridId = imageRefs.current[index].id + "img";
+          const grid = document.getElementById(gridId);
+          grid.style.background = "url(" + value + ")";
+          grid.style.backgroundSize = "200px 300px";
+        }
       }
     }
 
-    event.preventDefault()
-    var formData = new FormData()
-    formData.set('index', index)
-    formData.set('userId', props.id)
-    formData.set('file', event.target.files[0])
+    event.preventDefault();
+    var formData = new FormData();
+    formData.set("index", index);
+    formData.set("userId", globalId);
+    formData.set("file", event.target.files[0]);
     const config = {
       headers: {
-        'content-type': 'multipart/form-data',
+        "content-type": "multipart/form-data",
       },
-    }
-    await Axios.post(`base/img/${props.id}`, formData, config)
-  }
+    };
+    await Axios.post(`base/img/${globalId}`, formData, config).then((res) => {
+      console.log(res.data.data);
+      if (res.data.data.s) {
+        setStatusTrue(true);
+        setNewMsg(res.data.data.msg);
+      } else {
+        setOpen1(true);
+        setNewMsg(res.data.data.msg);
+        setErrors(res.data.data.errors);
+      }
+    });
+  };
+
+  //////////////////////////////////////// Drager ////////////////////////////////////////
 
   async function handleOnDragEnd(result) {
+    await Axios.post(`base/img/dnd1/${props.id}`) // index stuff
     if (!result.destination) return
     const items = Array.from(Items)
     const [reorderedItem] = items.splice(result.source.index, 1)
@@ -227,7 +258,7 @@ const MyAddImages = (props) => {
       }
       return null
     })
-    await Axios.post(`base/img/dnd/${props.id}`, {
+    await Axios.post(`base/img/dnd/${globalId}`, {
       index: result.source.index,
       id: result.destination.index,
     })
@@ -237,23 +268,35 @@ const MyAddImages = (props) => {
     handelRemoveImg(keyIndex)
     setOpen(false)
   }
+  /////////////////////////////////////////////////////////////////////////////////////////
 
   const handelRemoveImg = async (key) => {
-    console.log(printImages[key])
     if (printImages[key] === undefined){
-      await Axios.post(`/base/displayIndrager/${props.id}`).then((res) => {
+      await Axios.post(`/base/displayIndrager/${globalId}`).then((res) => {
         if (res.data.images[0] !== null){
           res.data.images[0].split(',').map((el, Keyi) => {
-            if (key === Keyi)
-              Axios.post(`base/dltImgUser/${props.id}`, {image: el})
+            if (key === Keyi){
+              var tmp = Items
+              tmp[key].value = ''
+              UpdateItems(tmp)
+              const gridId = imageRefs.current[key].id + 'img'
+              const grid = document.getElementById(gridId)
+              grid.style.background = 'url() #E0E4E9'
+              grid.style.backgroundSize = '200px 300px'
+              Axios.post(`base/dltImgUser/${globalId}`, {image: el})
+            }
+            return '';
           })
         }
       })
     }else{
-      if (Items[key].value !== '' && key !== 0){
-        // if (key === 0) {
-        //   SetProfileImg('https://raw.githubusercontent.com/hassanreus/img/master/profilImageManWomen.jpg')
-        // }
+      if (Items[key].value !== ''){
+        if (key === 0) {
+          SetProfileImg(
+            'https://raw.githubusercontent.com/hassanreus/img/master/profilImageManWomen.jpg'
+          )
+        }
+        triggerEffect(!effect)
         var tmp = Items
         tmp[key].value = ''
         UpdateItems(tmp)
@@ -261,42 +304,48 @@ const MyAddImages = (props) => {
         const grid = document.getElementById(gridId)
         grid.style.background = 'url() #E0E4E9'
         grid.style.backgroundSize = '200px 300px'
-        await Axios.post(`base/dltImgUser/${props.id}`, {image: printImages[key]})
-        const newList = printImages.filter((item, _key) => key !== _key)
-        // console.log(newList)
-        setprintImages(newList)
+        await Axios.post(`base/dltImgUser/${globalId}`, {
+          image: printImages[key],
+        })
+        printImages[key] = ""
+        setprintImages(printImages)
       }
     }
   }
 
+ React.useEffect(() => {
+   const interval = setInterval(() => {
+     setErrors("");
+     setNewMsg("");
+     if (open1) {
+       setOpen1(false);
+     }
+     if (statusTrue) {
+       setStatusTrue(false);
+     }
+   }, 1500);
+   return () => clearInterval(interval)
+ });
+
+  if (!didMount) return null
   return (
     <Size>
+      <Collapse in={open1}>
+        <Alert severity="error">{errors}</Alert>
+      </Collapse>
+      <Collapse in={statusTrue}>
+        <Alert severity="success">{msg}</Alert>
+      </Collapse>
       <Grid container>
-        {/* {printImages !== "" && printImages.split(',').length >= 0
-          ? printImages.split(',').map((el, iKey) => {
-              let srcImg = `http://localhost:3001/${el}`
-              let altImg = `display all image loop${iKey}`
-              return (
-                <div key={iKey} className={classes.big}>
-                  <CardMedia
-                    className={classes.media1}
-                    image={srcImg}
-                    title={altImg}
-                  />
-                  <IoIosRemoveCircleOutline className={classes.addCircle} onClick={(event) => handelRemoveImg(event, iKey)}/>
-                </div>
-              )
-            })
-          : ''} */}
-        <div style={{ overflowY: 'scroll', height: '600px' }}>
+        <div style={{ overflowY: "scroll", height: "600px" }}>
           <DragDropContext onDragEnd={handleOnDragEnd}>
-            <Droppable droppableId='items'>
+            <Droppable droppableId="items">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {Items.map(({ id }, index) => {
                     return (
                       <Draggable
-                        // isDragDisabled={isDD}
+                        isDragDisabled={true}
                         key={id}
                         draggableId={id}
                         index={index}
@@ -306,29 +355,29 @@ const MyAddImages = (props) => {
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             ref={provided.innerRef}
-                            id={id + 'img'}
+                            id={id + "img"}
                             className={classes.big}
-                            onClick={() => {handleClickOpen(index)}}
+                            onClick={() => {
+                              handleClickOpen(index);
+                            }}
                           >
                             <input
-                              name='file'
+                              name="file"
                               // accept=".gif,.jpg,.jpeg,.png"
                               ref={addToRefs}
                               onChange={(e) => {
-                                handleChange(e, id, index)
+                                handleChange(e, id, index);
                               }}
                               hidden
                               id={id}
-                              type='file'
+                              type="file"
                             />
                             {provided.placeholder}
-                            {/* {console.log(Object.keys(printImages.split(',')))}
-                            {Object.keys(printImages.split(',')) <= index ? <IoMdAddCircle className={classes.addCircle} /> : <IoIosRemoveCircleOutline className={classes.addCircle} onClick={(event) => handelRemoveImg(event, id)} />} */}
                             <IoMdAddCircle className={classes.addCircle} />
                           </div>
                         )}
                       </Draggable>
-                    )
+                    );
                   })}
                 </div>
               )}
@@ -341,14 +390,16 @@ const MyAddImages = (props) => {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-          <DialogTitle id="alert-dialog-title">{"Choose your action:"}</DialogTitle>
+          <DialogTitle id="alert-dialog-title">
+            {"Choose your action:"}
+          </DialogTitle>
           <DialogActions>
             <Button onClick={handleInsUpd} color="primary">
               Insert/Update
-          </Button>
+            </Button>
             <Button onClick={handleDeleteDialog} color="secondary" autoFocus>
               Delete
-          </Button>
+            </Button>
           </DialogActions>
         </Dialog>
         {/* <div
@@ -358,8 +409,8 @@ const MyAddImages = (props) => {
         </div> */}
         <Card className={classes.root}>
           <CardMedia
-            image='https://raw.githubusercontent.com/hassanreus/img/master/profilImageManWomen.jpg'
-            title='Contemplative Reptile'
+            image="https://raw.githubusercontent.com/hassanreus/img/master/profilImageManWomen.jpg"
+            title="Contemplative Reptile"
             // style={{ width: "400px", height: "600px" }}
             ref={ProfImgRef}
             className={classes.media}
@@ -367,7 +418,7 @@ const MyAddImages = (props) => {
         </Card>
       </Grid>
     </Size>
-  )
+  );
 }
 
 export default MyAddImages

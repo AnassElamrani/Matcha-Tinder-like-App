@@ -24,13 +24,11 @@ exports.index = async (req, res, next) => {
     res.json(false)
   else{
     if (cord !== undefined && gender !== undefined) {
-      /// iiner table users with location set where in search step < 1 km
       await Geo.getAll(cord, gender, id)
         .then(([res]) => {
           res.map((el) => {
             data.push(el)
           })
-          //     data.sort((a, b) => a.cmp - b.cmp);
         })
         .catch((err) => console.log(err))
       res.json(data)
@@ -65,7 +63,7 @@ exports.likes = async (req, res, next) => {
       like.save()
       // update fame rating with 1
       Like.fameRatingForLike(data.idLiker, 1)
-      // check if two users match
+      // check if two users matchw
       res.json({ status: true })
     } else res.json(dataErr)
   } else res.json(false)
@@ -95,7 +93,11 @@ exports.history = async (req, res, next) => {
     if (data.visitor !== undefined && data.visited !== undefined) {
       await History.checkIfVisited(data).then(([history]) => {
         history.map((el) => {
-          !el.lenght ? (dataErr.historyErr = 'Already visited') : ''
+          if (!el.lenght) {
+            dataErr.historyErr = 'Already visited'
+            // update created_at in db
+            History.updateHistoryDate(data)
+          }
         })
       })
   

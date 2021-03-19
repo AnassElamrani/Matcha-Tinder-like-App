@@ -22,31 +22,44 @@ exports.requireAuth = (req, res, next) => {
 
 exports.getUserInfos = (req, res, next) => {
     const token = req.cookies.jwt;
-    if (token) {
-        jwt.verify(token, 'secret', async (err, decodedToken) => {
-            if (err) {
-                res.locals.user = null;
-                next();
-            }else{
-                let user = await User.UserIdModel(decodedToken.id)
-                if(user[0].length != 0)
-                {
-                    let infos = user[0][0]
-                    if(infos.length != 0)
-                        res.json({user: infos})
+
+    // if (token !== undefined){
+
+        console.log(token)
+        if (token) {
+            jwt.verify(token, 'secret', async (err, decodedToken) => {
+                if (err) {
+                    res.locals.user = null;
+                    next();
+                }else{
+                    let user = await User.UserIdModel(decodedToken.id)
+                    if(user[0].length != 0)
+                    {
+                        let infos = user[0][0]
+                        if(infos.length != 0)
+                            res.json({user: infos})
+                    }
+                    else    // res.locals.user = infos
+                    {
+                        let oUser = await User.UserAuthIdModel(decodedToken.id)
+                        let oInfos = oUser[0][0]
+                        if(oInfos.length != 0)
+                            res.json({user: oInfos})
+                    }
+                    next()
                 }
-                else    // res.locals.user = infos
-                {
-                    let oUser = await User.UserAuthIdModel(decodedToken.id)
-                    let oInfos = oUser[0][0]
-                    if(oInfos.length != 0)
-                        res.json({user: oInfos})
-                }
-                next()
-            }
-        })
-    }else{
-        res.locals.user = null
-        next()
-    }
+            })
+        }else{
+            // res.clearCookie("jwt")
+            res.locals.user = null
+            next()
+        }
+
+    // }else{
+    //     //// improve that in the futur
+    //     res.clearCookie("jwt")
+    //     // console.log(req.cookies)
+    //     // if (!req.cookies.lenght)
+    //     //     next()
+    // }
 }

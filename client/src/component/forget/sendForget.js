@@ -54,7 +54,6 @@ const SendForget = (props) => {
           // 1 -first way to merge data
           // const err = res.data
           // setErr({...errMsg, ...res.data})
-          console.log(res.data)
           // 2 -first way to merge data
           setErr((prevState) => {
             // Object.assign would also work

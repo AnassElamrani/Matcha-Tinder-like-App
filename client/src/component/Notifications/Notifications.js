@@ -29,9 +29,9 @@ const useStyles = makeStyles((theme) => ({
     },
     Troot: {
         '& > *': {
-          margin: theme.spacing(1),
+            margin: theme.spacing(1),
         },
-      },
+    },
     // bdg : {
     //     backgroundColor: 'pink'
     // }
@@ -87,100 +87,101 @@ const Notifications = (props) => {
     const id = open ? 'simple-popover' : undefined;
 
     // React.useEffect(() => {
-        socket.on('receive_like', (data) => {
-            console.log('|-----=> ', data);
-            if(data.target === props.myInfos.id)
-                snn(notifNumber);
-        })
-        socket.on('receive_visit', (data) => {
-            console.log('|---visit=> ', data);
-            if(data.target === props.myInfos.id)
-                snn(notifNumber);
-        })
-        socket.on('receive_dislike', (data) => {
-            console.log('|---dislike=> ', data.target, props.myInfos.id);
-            if(data.idDisliked === props.myInfos.id)
-                snn(notifNumber);
-        })
+    socket.on('receive_like', (data) => {
+        console.log('|-----=> ', data);
+        if (data.target === props.myInfos.id)
+            snn(notifNumber);
+    })
+    socket.on('receive_visit', (data) => {
+        console.log('|---visit=> ', data);
+        if (data.target === props.myInfos.id)
+            snn(notifNumber);
+    })
+    socket.on('receive_dislike', (data) => {
+
+        console.log('|---dislike=> ', data.target, props.myInfos.id);
+        if (data.idDisliked === props.myInfos.id)
+            snn(notifNumber);
+
+    })
 
     // }, []);
     console.log('notifications', notifications)
     return (
         <StylesProvider injectFirst>
 
-        <div className={classes.Troot}>
-            <Badge className={classes.bdg} badgeContent={notifNumber} aria-describedby={id} color="secondary" onClick={handleClick}>
-                <NotificationsIcon />
-            </Badge>
-            <Popover
-                id={id}
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center',
-                }}
-            >
-                {
-                    (notifications.length === 0) ? <Typography>nulllllllllll</Typography>
-                     :       
-                    notifications.map((el) => {
-                        if(el.type != "message")
-                        {
+            <div className={classes.Troot}>
+                <Badge className={classes.bdg} badgeContent={notifNumber} aria-describedby={id} color="secondary" onClick={handleClick}>
+                    <NotificationsIcon />
+                </Badge>
+                <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'center',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'center',
+                    }}
+                >
+                    {
+                        (notifications.length === 0) ? <Typography>nulllllllllll</Typography>
+                            :
+                            notifications.map((el) => {
+                                if (el.type != "message") {
 
-                            return(
-                                <List className={classes.root}>
+                                    return (
+                                        <List className={classes.root}>
 
-                        <ListItem alignItems="flex-start">
-                            <ListItemAvatar>
-                                <Avatar alt={`${el.userName}image`} src={`http://localhost:3001/${el.image}`} />
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={
-                                    el.type == "like" ? "New like" 
-                                    :
-                                    el.type == "visit" ? "New visit"
-                                    :
-                                    el.type == "likes back" ? "Matched"
-                                    :
-                                    el.type == "dislike" ? "Unmatched" : ''
+                                            <ListItem alignItems="flex-start">
+                                                <ListItemAvatar>
+                                                    <Avatar alt={`${el.userName}image`} src={`http://localhost:3001/${el.image}`} />
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={
+                                                        el.type == "like" ? "New like"
+                                                            :
+                                                            el.type == "visit" ? "New visit"
+                                                                :
+                                                                el.type == "likes back" ? "Matched"
+                                                                    :
+                                                                    el.type == "dislike" ? "Unmatched" : ''
+                                                    }
+                                                    secondary={
+                                                        <React.Fragment>
+                                                            <Typography
+                                                                component="span"
+                                                                variant="body2"
+                                                                className={classes.inline}
+                                                                color="textPrimary"
+                                                            >
+                                                                {el.userName}
+                                                            </Typography>
+                                                            {`${el.type}your profile`}
+                                                        </React.Fragment>
+                                                    }
+                                                />
+                                            </ListItem>
+                                            <Divider variant="inset" component="li" />
+
+                                        </List>
+                                    )
                                 }
-                                secondary={
-                                    <React.Fragment>
-                                        <Typography
-                                            component="span"
-                                            variant="body2"
-                                            className={classes.inline}
-                                            color="textPrimary"
-                                            >
-                                            {el.userName}
-                                        </Typography>
-                                        {`${el.type }your profile`}
-                                    </React.Fragment>
-                                }
-                                />
-                        </ListItem>
-                        <Divider variant="inset" component="li" />
-
-                    </List>
-                            )
-                        }
                             })
-                        }
-                        
-                        </Popover>
-                        {/* <Badge badgeContent={messageNumber} color="primary">
+                    }
+
+                </Popover>
+                {/* <Badge badgeContent={messageNumber} color="primary">
                         <MailIcon />
             </Badge> */}
-            {/* <Badge badgeContent={notifNumber} color="primary">
+                {/* <Badge badgeContent={notifNumber} color="primary">
                 <NotificationsIcon />
             </Badge> */}
-        </div>
+            </div>
         </StylesProvider>
     )
 };

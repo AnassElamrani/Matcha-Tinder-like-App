@@ -39,15 +39,15 @@ const Forget = (props) => {
     const [newPassword, setPass] = React.useState('')
     const [cnfrmPassword, setCnfPass] = React.useState('')
     const [valid, setValid] = React.useState(false)
+    const [passwordStatus, setPasswordStatus] = React.useState(false)
 
     const forget = (e, id) => {
         e.preventDefault();
         Axios.post(`users/edit/${id}`, {
-            password: oldPassword,
+            ...(!passwordStatus ? { password: oldPassword } : {}),
             newPassword: newPassword,
             cnfrmPassword: cnfrmPassword
         }).then((res) => {
-          console.log(res.data)
             if (res.data.input)
               setInputErr(res.data.input)
             else
@@ -62,35 +62,45 @@ const Forget = (props) => {
               setValid(false)
         })
     }
+
+    React.useEffect(() => {
+      Axios.post(`users/outh/${props.id}`).then((res) => {
+        res.data ? setPasswordStatus(res.data) : setPasswordStatus(res.data)
+      });
+    }, [props])
     return (
       <Size>
         <Container className={classes.copy} component='main' maxWidth='xs'>
           <Typography className={classes.typo} component='h1' variant='h5'>
-            Change Password 
+            Change Password
           </Typography>
           <div className={classes.paper}>
-            <form method='POST' onSubmit={(event) => forget(event, props.id) }>
+            <form method='POST' onSubmit={(event) => forget(event, props.id)}>
               <Grid container spacing={2}>
                 <Typography variant='subtitle2' gutterBottom color='secondary'>
                   {errMsg}
                 </Typography>
+                {/* <input id="userName" name="username" autocomplete="username" value="" /> */}
+                <input type='text' autoComplete='username' hidden />
                 <Grid item xs={12}>
-                  <TextField
-                    variant='outlined'
-                    margin='normal'
-                    required
-                    fullWidth
-                    name='password'
-                    label='Old password'
-                    type='password'
-                    id='inputOldPassword'
-                    autoFocus
-                    autoComplete='current-password'
-                    onChange={(e) => setOldPass(e.target.value)}
-                    value={oldPassword}
-                    helperText={inputErr.validPassErr}
-                    error={inputErr.validPassErr !== undefined}
-                  />
+                  {!passwordStatus && (
+                    <TextField
+                      variant='outlined'
+                      margin='normal'
+                      required
+                      fullWidth
+                      name='password'
+                      label='Old password'
+                      type='password'
+                      id='inputOldPassword'
+                      autoFocus
+                      autoComplete='current-password'
+                      onChange={(e) => setOldPass(e.target.value)}
+                      value={oldPassword}
+                      helperText={inputErr.validPassErr}
+                      error={inputErr.validPassErr !== undefined}
+                    />
+                  )}
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
@@ -126,7 +136,9 @@ const Forget = (props) => {
                     error={inputErr.validCnfpErr !== undefined}
                   />
                 </Grid>
-                {valid === true && <Alert severity='success'>Update Complet</Alert>}
+                {valid === true && (
+                  <Alert severity='success'>Update Complet</Alert>
+                )}
               </Grid>
               <Button
                 type='submit'

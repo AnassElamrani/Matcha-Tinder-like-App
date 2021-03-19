@@ -16,6 +16,8 @@ exports.keyBcypt = (password) => {
 // helper to compare password already exsist
 
 exports.cmpBcypt = (password, password1) => {
+  if (password === undefined)
+    return true
   const cmp = bcrypt.compareSync(password, password1);
   return cmp;
 };

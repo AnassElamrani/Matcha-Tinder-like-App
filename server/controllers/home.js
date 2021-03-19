@@ -68,48 +68,59 @@ exports.editProfil = (req, res) => {
   data.id = req.params.id
   dataErr.status = false
 
-  if (Object.keys(toSend.input).length !== 0) res.json(toSend)
-  else{
-    User.UpdateProfilInfo(data);
-    data.tag.map((el) => {
-      Tag.tagExists(el.name).then(([tagRes]) => {
-        if (!tagRes.length) {
-          const tag = new Tag(null, el.name)
-          tag.save().then(() => {
-            Tag.tagExists(el.name).then((res) => {
-              res[0].map((id) => {
-                Tag.insertInTagUser(data.id, id.id)
-              })
-            })
-          })
-        } else {
-          Tag.tagIdModel(data.id, el.name).then(([userTag]) => {
-            if (!userTag.length) {
+  // if (
+  //   req.body.userName !== undefined &&
+  //   req.body.bio !== undefined &&
+  //   req.body.gender !== undefined &&
+  //   req.body.type !== undefined &&
+  //   req.body.age !== undefined &&
+  //   req.body.email !== undefined &&
+  //   req.body.password !== undefined &&
+  //   req.body.cnfrmPassword !== undefined &&
+  //   req.body.firstName !== undefined &&
+  //   req.body.lastName !== undefined
+  // ) {
+    if (Object.keys(toSend.input).length !== 0) res.json(toSend)
+    else {
+      User.UpdateProfilInfo(data)
+      data.tag.map((el) => {
+        Tag.tagExists(el.name).then(([tagRes]) => {
+          if (!tagRes.length) {
+            const tag = new Tag(null, el.name)
+            tag.save().then(() => {
               Tag.tagExists(el.name).then((res) => {
                 res[0].map((id) => {
                   Tag.insertInTagUser(data.id, id.id)
                 })
               })
-            }
-            else{
-              data.tag1.map(el => {
-                Tag.tagExists(el.name).then(([res]) => {
-                  res.map((id) => {
-                    Tag.deleteTagUser(data.id, id.id)
+            })
+          } else {
+            Tag.tagIdModel(data.id, el.name).then(([userTag]) => {
+              if (!userTag.length) {
+                Tag.tagExists(el.name).then((res) => {
+                  res[0].map((id) => {
+                    Tag.insertInTagUser(data.id, id.id)
                   })
                 })
-              })
-              
-            }
-          })
-          dataErr.msgTag = 'Already exists'
-        }
+              } else {
+                data.tag1.map((el) => {
+                  Tag.tagExists(el.name).then(([res]) => {
+                    res.map((id) => {
+                      Tag.deleteTagUser(data.id, id.id)
+                    })
+                  })
+                })
+              }
+            })
+            dataErr.msgTag = 'Already exists'
+          }
+        })
       })
-    })
-    dataErr.status = true
-    res.json(dataErr);
-  }
-};
+      dataErr.status = true
+      res.json(dataErr)
+    }
+  // } else res.json(false)
+}
 
 // Fill profil with help of id just for test
 
@@ -203,7 +214,6 @@ exports.allTags = async (req, res, next) => {
 exports.getImges = (req, res) => {
   const uploadDerictory = path.join("public/upload");
   fs.readdir(uploadDerictory, (err, files) => {
-    console.log(files);
     if (err) {
       res.json({ msg: err });
     } else if (files.length === 0) {
@@ -234,6 +244,20 @@ exports.checkIs1 = (req, res) => {
       res.json({ status: false })
   })
 }
+
+// check localization
+
+exports.checkLocIs1 = async (req, res) => {
+  // res.json(false);
+  if (isNaN(req.params.id) || req.params.id==0);
+  else{
+    await Geo.checkLocIs(req.params.id).then(([is]) => {
+      if (!is.length) {
+        res.json({ status: true });
+      } else res.json({ status: false });
+    });
+  }
+};
 
 exports.geo = (req, res, next) => {
   var data = {},
@@ -304,6 +328,7 @@ exports.multerUpload = (req, res, next) => {
         } else {
           data.msg = "File Uploaded!"
           data.errors = "";
+          data.s = true
           data.index = req.body.index;
           checkIm = await Img.checkImg(req.body.userId, req.body.index);
           if(checkIm[0].length == 0)
@@ -325,10 +350,21 @@ exports.multerUpload = (req, res, next) => {
 
 
 exports.dnd = async (req, res, next) => {
-  console.log('-')
-  console.log('dnd', req.body)
-  res.json({ops :'DnD'});
-  var changeIndex = await Img.updateImgPointer(req.body.index, req.body.id)
+  res.json({ops :'DnD'})
+  await Img.updateImgPointer(req.body.index, req.body.id, req.params.id)
+  // await Img.updateJustProfil(req.params.id)
+}
+
+exports.dnd1 = async (req, res, next) => {
+  // console.log("test");
+  await Img.justThefirstRows(req.params.id)
+  await Img.condtionBeforeUpdate(req.params.id).then(async ([res]) => {
+    if (!res.length){
+      console.log("test");
+      await Img.justThefirstRows1(req.params.id)
+    }
+  })
+  res.json(false)
 }
 
 // get number of images saved in db

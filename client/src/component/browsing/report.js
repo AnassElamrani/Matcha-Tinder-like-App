@@ -36,8 +36,12 @@ const FormDialog = (props) => {
   };
 
   const handleClickOpen = () => {
-    setOpen(true)
-    setStatus(false)
+    if (props.statusImg)
+      props.setOpen(true)
+    else{
+      setOpen(true)
+      setStatus(false)
+    }
   }
 
   const handleClose = () => {
@@ -60,6 +64,7 @@ const FormDialog = (props) => {
   return (
     <div>
       <IconButton
+        color="primary"
         className={clsx(classes.expand)}
         aria-label='Report User'
         onClick={handleClickOpen}
